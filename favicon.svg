@@ -1,0 +1,21 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- StopScroll icon, design B, "The end of the feed": three
+       separate downward chevrons, the "more below" hint every feed shows, fading in as they near a
+       flat bar where the feed ends. Chevrons sit 16 units apart (4 px at 16 px), so they stay apart at tab size. Each chevron is one V of two strokes; none joins the next, so
+       nothing forms a zig-zag or a bolt. No shaft, so it is not a download arrow. -->
+  <path d="M16 6 L32 14 L48 6" stroke="url(#indigoDeep)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+  <path d="M16 22 L32 30 L48 22" stroke="url(#indigoDeep)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <path d="M16 38 L32 46 L48 38" stroke="url(#indigoDeep)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- The end -->
+  <rect x="5.25" y="53.25" width="53.5" height="7.5" rx="3.75" fill="#c7d2fe" stroke="url(#indigoDeep)" stroke-width="2.5"/>
+  <defs>
+    <linearGradient id="indigo" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#c7d2fe"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="indigoDeep" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#a5b4fc"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+</svg>

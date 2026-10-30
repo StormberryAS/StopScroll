@@ -1,0 +1,20 @@
+[versions]
+# Pinned deliberately, every one an exact version, and the same as GDPRLetterBuilder's and
+# EclipseTracker's (the Labs WebView template), so the Labs apps move together. No new dependency.
+agp = "9.3.1"            # AGP 9.3.x: Gradle 9.5.0, built-in Kotlin
+activity = "1.13.0"
+coreKtx = "1.19.0"
+webkit = "1.17.0"
+junit = "4.13.2"
+# Unit-test classpath only, as EclipseTracker: the mockable android.jar stubs org.json to throw.
+json = "20260522"
+
+[libraries]
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+json = { group = "org.json", name = "json", version.ref = "json" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

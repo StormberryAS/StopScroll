@@ -1,0 +1,14 @@
+# Build output and machine-local files. Signing keys never enter the repository: keystore.properties
+# (if used) names a key file outside it and holds no password, and is never committed.
+.gradle/
+build/
+app/build/
+local.properties
+keystore.properties
+*.jks
+*.p12
+*.keystore
+.idea/
+*.iml
+.kotlin/
+captures/

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- StopScroll test fixture. SANITISED by tools/scrub-fixture.ts: every text, content-desc and hint
+     was removed, with every attribute except class, resource-id, bounds and selected. The tree
+     structure is kept as captured. The raw capture holds personal on-screen text and never enters
+     this repository. -->
+<fixture app="com.google.android.youtube" label="youtube-home-1" expect="allow" captured="2026-10-29" device="Pixel, Android 17" android="17" source="uiautomator">
+  <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+    <node class="android.widget.LinearLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+      <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+        <node class="android.widget.LinearLayout" resource-id="com.google.android.youtube:id/action_bar_root" bounds="[0,0][1080,2410]" selected="false">
+          <node class="android.widget.FrameLayout" resource-id="android:id/content" bounds="[0,0][1080,2410]" selected="false">
+            <node class="androidx.drawerlayout.widget.DrawerLayout" resource-id="com.google.android.youtube:id/more_drawer_container" bounds="[0,0][1080,2410]" selected="false">
+              <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/slim_status_bar_player_container" bounds="[0,0][1080,2410]" selected="false">
+                <node class="android.view.View" resource-id="" bounds="[0,0][3,3]" selected="false" />
+                <node class="android.view.ViewGroup" resource-id="com.google.android.youtube:id/navigation_bar_divider_frame" bounds="[0,172][1080,2347]" selected="false">
+                  <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/global_slim_status_bar_container" bounds="[0,172][1080,2347]" selected="false" />
+                  <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/accessibility_layer_container" bounds="[0,172][1080,2347]" selected="false">
+                    <node class="android.view.ViewGroup" resource-id="com.google.android.youtube:id/next_gen_watch_container_layout" bounds="[0,172][1080,2347]" selected="false">
+                      <node class="android.widget.ScrollView" resource-id="com.google.android.youtube:id/watch_while_layout_coordinator_layout" bounds="[0,172][1080,2347]" selected="false">
+                        <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/fab_container" bounds="[0,172][1080,2347]" selected="false" />
+                        <node class="android.widget.LinearLayout" resource-id="com.google.android.youtube:id/appbar_layout" bounds="[0,172][1080,298]" selected="false">
+                          <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/toolbar_container" bounds="[0,172][1080,298]" selected="false">
+                            <node class="android.view.ViewGroup" resource-id="com.google.android.youtube:id/toolbar" bounds="[0,172][1080,298]" selected="false">
+                              <node class="android.widget.FrameLayout" resource-id="" bounds="[0,172][702,298]" selected="false">
+                                <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/youtube_logo" bounds="[0,172][339,298]" selected="false" />
+                              </node>
+                              <node class="android.support.v7.widget.LinearLayoutCompat" resource-id="" bounds="[702,172][1080,298]" selected="false">
+                                <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/menu_item_0" bounds="[702,172][828,298]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[702,172][828,298]" selected="false">
+                                    <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/menu_item_view" bounds="[702,172][828,298]" selected="false" />
+                                  </node>
+                                </node>
+                                <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/menu_item_1" bounds="[828,172][954,298]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[828,172][954,298]" selected="false">
+                                    <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/menu_item_view" bounds="[828,172][954,298]" selected="false" />
+                                  </node>
+                                </node>
+                                <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/menu_item_2" bounds="[954,172][1080,298]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[954,172][1080,298]" selected="false">
+                                    <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/menu_item_view" bounds="[954,172][1080,298]" selected="false" />
+                                  </node>
+                                </node>
+                              </node>
+                            </node>
+                          </node>
+                        </node>
+                        <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/pane_fragment_container" bounds="[0,298][1080,2347]" selected="false">
+                          <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/loading_layout" bounds="[0,298][1080,2347]" selected="false">
+                            <node class="android.view.ViewGroup" resource-id="" bounds="[0,298][1080,2347]" selected="false">
+                              <node class="android.support.v7.widget.RecyclerView" resource-id="com.google.android.youtube:id/results" bounds="[0,298][1080,2347]" selected="false">
+                                <node class="android.view.ViewGroup" resource-id="" bounds="[0,298][1080,1101]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[0,298][1080,1038]" selected="false">
+                                    <node class="android.widget.ImageView" resource-id="" bounds="[0,298][1080,905]" selected="false" />
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[0,298][1080,905]" selected="false">
+                                      <node class="android.widget.ImageView" resource-id="" bounds="[0,298][1080,905]" selected="false" />
+                                    </node>
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[0,905][1080,1038]" selected="false">
+                                      <node class="android.view.ViewGroup" resource-id="" bounds="[0,905][1080,1038]" selected="false">
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[32,937][127,1032]" selected="false" />
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[148,937][933,1038]" selected="false">
+                                          <node class="android.view.ViewGroup" resource-id="" bounds="[148,937][933,1038]" selected="false">
+                                            <node class="android.view.ViewGroup" resource-id="" bounds="[148,937][933,1038]" selected="false">
+                                              <node class="android.view.ViewGroup" resource-id="" bounds="[148,937][933,985]" selected="false" />
+                                              <node class="android.view.ViewGroup" resource-id="" bounds="[148,985][933,1038]" selected="false" />
+                                            </node>
+                                          </node>
+                                        </node>
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[954,937][1017,1000]" selected="false" />
+                                      </node>
+                                    </node>
+                                  </node>
+                                </node>
+                                <node class="android.view.ViewGroup" resource-id="" bounds="[0,1101][1080,1122]" selected="false" />
+                                <node class="android.view.ViewGroup" resource-id="" bounds="[0,1122][1080,1259]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[0,1122][1080,1259]" selected="false">
+                                    <node class="android.widget.ImageView" resource-id="" bounds="[42,1143][137,1238]" selected="false" />
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[169,1162][310,1220]" selected="false" />
+                                    <node class="android.widget.ImageView" resource-id="" bounds="[975,1159][1038,1222]" selected="false" />
+                                  </node>
+                                </node>
+                                <node class="android.view.ViewGroup" resource-id="" bounds="[0,1259][1080,2025]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[0,1259][540,2025]" selected="false">
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[32,1259][531,2007]" selected="false">
+                                      <node class="android.view.ViewGroup" resource-id="" bounds="[32,1259][531,2007]" selected="false">
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[32,1259][531,2007]" selected="false" />
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[32,1259][531,2007]" selected="false" />
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[32,1259][531,2007]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[32,1259][531,2007]" selected="false" />
+                                        </node>
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[426,1259][531,1364]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[473,1280][520,1327]" selected="false" />
+                                        </node>
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[32,1891][531,2007]" selected="false">
+                                          <node class="android.view.ViewGroup" resource-id="" bounds="[53,1891][510,1986]" selected="false">
+                                            <node class="android.view.ViewGroup" resource-id="" bounds="[53,1891][510,1986]" selected="false">
+                                              <node class="android.view.ViewGroup" resource-id="" bounds="[53,1891][510,1986]" selected="false" />
+                                            </node>
+                                          </node>
+                                        </node>
+                                      </node>
+                                    </node>
+                                  </node>
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[540,1259][1080,2025]" selected="false">
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[549,1259][1048,2007]" selected="false">
+                                      <node class="android.view.ViewGroup" resource-id="" bounds="[549,1259][1048,2007]" selected="false">
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[549,1259][1048,2007]" selected="false" />
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[549,1259][1048,2007]" selected="false" />
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[549,1259][1048,2007]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[549,1259][1048,2007]" selected="false" />
+                                        </node>
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[943,1259][1048,1364]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[990,1280][1037,1327]" selected="false" />
+                                        </node>
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[549,1938][1048,2007]" selected="false">
+                                          <node class="android.view.ViewGroup" resource-id="" bounds="[570,1938][1027,1986]" selected="false">
+                                            <node class="android.view.ViewGroup" resource-id="" bounds="[570,1938][1027,1986]" selected="false">
+                                              <node class="android.view.ViewGroup" resource-id="" bounds="[570,1938][1027,1986]" selected="false" />
+                                            </node>
+                                          </node>
+                                        </node>
+                                      </node>
+                                    </node>
+                                  </node>
+                                </node>
+                                <node class="android.view.ViewGroup" resource-id="" bounds="[0,2025][1080,2347]" selected="false">
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[0,2025][540,2347]" selected="false">
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[32,2025][531,2347]" selected="false">
+                                      <node class="android.view.ViewGroup" resource-id="" bounds="[32,2025][531,2347]" selected="false">
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[32,2025][531,2347]" selected="false" />
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[32,2025][531,2347]" selected="false" />
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[32,2025][531,2347]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[32,2025][531,2347]" selected="false" />
+                                        </node>
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[426,2025][531,2130]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[473,2046][520,2093]" selected="false" />
+                                        </node>
+                                      </node>
+                                    </node>
+                                  </node>
+                                  <node class="android.view.ViewGroup" resource-id="" bounds="[540,2025][1080,2347]" selected="false">
+                                    <node class="android.view.ViewGroup" resource-id="" bounds="[549,2025][1048,2347]" selected="false">
+                                      <node class="android.view.ViewGroup" resource-id="" bounds="[549,2025][1048,2347]" selected="false">
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[549,2025][1048,2347]" selected="false" />
+                                        <node class="android.widget.ImageView" resource-id="" bounds="[549,2025][1048,2347]" selected="false" />
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[549,2025][1048,2347]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[549,2025][1048,2347]" selected="false" />
+                                        </node>
+                                        <node class="android.view.ViewGroup" resource-id="" bounds="[943,2025][1048,2130]" selected="false">
+                                          <node class="android.widget.ImageView" resource-id="" bounds="[990,2046][1037,2093]" selected="false" />
+                                        </node>
+                                      </node>
+                                    </node>
+                                  </node>
+                                </node>
+                              </node>
+                            </node>
+                          </node>
+                        </node>
+                      </node>
+                    </node>
+                    <node class="android.widget.LinearLayout" resource-id="com.google.android.youtube:id/bottom_bar_container" bounds="[0,2221][1080,2347]" selected="false">
+                      <node class="android.widget.HorizontalScrollView" resource-id="com.google.android.youtube:id/pivot_bar" bounds="[0,2221][1080,2347]" selected="false">
+                        <node class="android.widget.LinearLayout" resource-id="" bounds="[0,2221][1080,2347]" selected="false">
+                          <node class="android.widget.Button" resource-id="" bounds="[0,2221][216,2347]" selected="true">
+                            <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/thumbnail_layout" bounds="[77,2235][140,2298]" selected="true">
+                              <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/image" bounds="[77,2235][140,2298]" selected="true" />
+                            </node>
+                            <node class="android.widget.TextView" resource-id="com.google.android.youtube:id/text" bounds="[70,2303][147,2333]" selected="true" />
+                          </node>
+                          <node class="android.widget.Button" resource-id="" bounds="[216,2221][432,2347]" selected="false">
+                            <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/thumbnail_layout" bounds="[293,2235][356,2298]" selected="false">
+                              <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/image" bounds="[293,2235][356,2298]" selected="false" />
+                            </node>
+                            <node class="android.widget.TextView" resource-id="com.google.android.youtube:id/text" bounds="[283,2303][365,2333]" selected="false" />
+                          </node>
+                          <node class="android.widget.Button" resource-id="" bounds="[432,2221][648,2347]" selected="false">
+                            <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/image" bounds="[493,2238][588,2333]" selected="false" />
+                          </node>
+                          <node class="android.widget.Button" resource-id="" bounds="[648,2221][864,2347]" selected="false">
+                            <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/thumbnail_layout" bounds="[725,2235][788,2298]" selected="false">
+                              <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/image" bounds="[725,2235][788,2298]" selected="false" />
+                            </node>
+                            <node class="android.view.View" resource-id="com.google.android.youtube:id/new_content_dot" bounds="[762,2230][794,2262]" selected="false" />
+                            <node class="android.widget.TextView" resource-id="com.google.android.youtube:id/text" bounds="[674,2303][838,2333]" selected="false" />
+                          </node>
+                          <node class="android.widget.Button" resource-id="" bounds="[864,2221][1080,2347]" selected="false">
+                            <node class="android.widget.FrameLayout" resource-id="com.google.android.youtube:id/thumbnail_layout" bounds="[941,2235][1004,2298]" selected="false">
+                              <node class="android.widget.ImageView" resource-id="com.google.android.youtube:id/pivot_bar_thumbnail" bounds="[941,2235][1004,2298]" selected="false" />
+                            </node>
+                            <node class="android.widget.TextView" resource-id="com.google.android.youtube:id/text" bounds="[947,2303][998,2333]" selected="false" />
+                          </node>
+                        </node>
+                      </node>
+                    </node>
+                  </node>
+                </node>
+              </node>
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</fixture>

@@ -1,0 +1,17 @@
+# GitHub's language bar counts what people write, not what a tool generates. These files are
+# compiled from ts/ and android/web-overlay/android-bridge.ts by tools/build-ts.sh; edit the
+# TypeScript, never the .js. tests/guards.test.ts fails on any tracked .js not listed here.
+/app.js linguist-generated=true
+/core/*.js linguist-generated=true
+/android/web-overlay/android-bridge.js linguist-generated=true
+# Sanitised test fixtures (structure only, no screen text), written by tools/scrub-fixture.ts.
+/tests/fixtures/** linguist-generated=true
+# disclaimer.html and disclaimer.css are written from DISCLAIMER.md by build-disclaimers.py, the
+# generator Stormberry's Labs apps share; edit DISCLAIMER.md, never the HTML.
+/disclaimer.html linguist-generated=true
+/disclaimer.css linguist-generated=true
+# The Inter typeface, as published by its authors (OFL-1.1, see NOTICE).
+/fonts/** linguist-vendored=true
+# Store images are binary.
+*.png binary
+*.woff2 binary

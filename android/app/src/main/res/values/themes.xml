@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The WebView draws the page; the window is the page's colour before the first frame. -->
+    <style name="Theme.StopScroll" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/page_background</item>
+        <item name="android:colorBackground">@color/page_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

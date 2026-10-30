@@ -1,0 +1,7 @@
+# TypeScript compiler, installed by tools/build-ts.sh from package-lock.json.
+node_modules/
+# Raw screen captures never enter this repository (they hold personal on-screen text).
+*.raw.xml
+raw/
+.env
+.env.*

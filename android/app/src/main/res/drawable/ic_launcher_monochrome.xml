@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Draft B themed-icon layer (Android 13 and later): one colour, read by its alpha only. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.8064"
+        android:scaleY="0.8064"
+        android:translateX="28.20"
+        android:translateY="27.59">
+        <path android:pathData="M16,6 L32,14 L48,6" android:strokeColor="#FFFFFFFF" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeAlpha="0.4" />
+        <path android:pathData="M16,22 L32,30 L48,22" android:strokeColor="#FFFFFFFF" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeAlpha="0.7" />
+        <path android:pathData="M16,38 L32,46 L48,38" android:strokeColor="#FFFFFFFF" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" />
+        <path android:pathData="M9,52 H55 A5,5 0 0,1 55,62 H9 A5,5 0 0,1 9,52 Z" android:fillColor="#FFFFFFFF" />
+    </group>
+</vector>

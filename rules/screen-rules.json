@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "rulesVersion": "2026-10-29.1",
+  "date": "2026-10-29",
+  "apps": [
+    {
+      "id": "youtube",
+      "package": "com.google.android.youtube",
+      "name": "YouTube",
+      "feedName": "YouTube Shorts",
+      "surfaces": [
+        {
+          "id": "shorts",
+          "match": {
+            "any": [
+              { "node": { "id": "reel_watch_player", "minHeight": 0.6 } },
+              { "node": { "id": "reel_player_page_container", "minHeight": 0.6 } }
+            ]
+          },
+          "exclude": [],
+          "otherTab": { "parentId": "pivot_bar", "child": "firstClickable" }
+        }
+      ],
+      "verifiedOn": [
+        {
+          "device": "Pixel, Android 17",
+          "android": "17",
+          "appVersionName": "not recorded",
+          "appVersionCode": 0,
+          "date": "2026-10-29",
+          "how": "uiautomator dumps, sanitised into tests/fixtures/youtube/"
+        }
+      ]
+    }
+  ]
+}

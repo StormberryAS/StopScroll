@@ -1,0 +1,35 @@
+Third-Party Notices
+===================
+
+Kept out of LICENSE so that licence scanners detect the MIT licence.
+
+StopScroll's own code is Stormberry AS's, under the MIT licence (LICENSE).
+
+The pages (index.html, privacy.html, disclaimer.html, app.js, core/, style.css, disclaimer.css,
+favicon.svg, apple-touch-icon.png) ship no third-party code or data. They use one typeface:
+
+Inter (fonts/inter/)
+  Licence:   SIL Open Font License 1.1 (OFL-1.1)
+  Source:    https://rsms.me/inter/
+  Copyright (c) 2016 The Inter Project Authors
+
+  This Font Software is licensed under the SIL Open Font License, Version 1.1.
+  Full licence text: licences/Inter-OFL-1.1.txt, and https://scripts.sil.org/OFL
+
+The Android app's release build depends on these libraries, all under the Apache License,
+Version 2.0 (full text in android/licences/Apache-2.0.txt), pinned in
+android/gradle/libs.versions.toml:
+
+  androidx.activity:activity 1.13.0
+  androidx.core:core-ktx 1.19.0
+  androidx.webkit:webkit 1.17.0
+  and their transitive androidx and Kotlin standard library dependencies
+
+The APK carries these licence texts in assets/licences/ (Apache-2.0.txt, StopScroll-MIT.txt and
+THIRD-PARTY.txt, which lists every bundled library) and assets/web/licences/Inter-OFL-1.1.txt.
+
+Build and test tools only, never shipped: TypeScript 6.0.3 (Apache-2.0), @types/node 24.19.2 (MIT),
+JUnit 4.13.2 (EPL-1.0), org.json 20260522 (public domain).
+
+No code is copied from any other short-video blocker. View IDs are facts, taken from StopScroll's
+own captures on 29 October 2026 (tests/fixtures/, sanitised: structure only, no screen text).

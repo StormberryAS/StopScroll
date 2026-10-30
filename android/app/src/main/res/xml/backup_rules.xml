@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 30 and below. Excludes everything; redundant on top of allowBackup="false", on purpose. -->
+<full-backup-content>
+    <exclude domain="root" />
+    <exclude domain="device_root" />
+    <exclude domain="external" />
+</full-backup-content>

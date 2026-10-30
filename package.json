@@ -1,0 +1,25 @@
+{
+  "name": "stopscroll",
+  "private": true,
+  "type": "module",
+  "description": "Build and test tooling only: compiles ts/ into the JavaScript the page loads (app.js and core/) and the Android bridge script, and runs the tests (TypeScript, run by Node 24 directly). The app has no runtime dependencies.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tools/build-ts.sh",
+    "check": "tools/build-ts.sh --check",
+    "test": "node --test tests/*.test.ts"
+  },
+  "imports": {
+    "#core/*.js": {
+      "types": "./ts/core/*.ts",
+      "default": "./core/*.js"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}
