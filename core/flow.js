@@ -84,7 +84,6 @@ export function showAdvancedProtection(state) {
 export const COMING_SOON = [
     { key: 'facebook', name: 'Facebook' },
     { key: 'snapchat', name: 'Snapchat' },
-    { key: 'linkedin', name: 'LinkedIn' },
 ];
 export function appRows(state) {
     const rows = state.apps.map((a) => {

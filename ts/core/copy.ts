@@ -8,11 +8,15 @@
 // "0.0.2" and was approved by Marcos on 30 October 2026 ("Everything is approved for StopScroll").
 // 0.0.3 (31 October 2026) watches X too (Marcos: implement X or Facebook, whichever is easiest;
 // decided in DESIGN.md of 2026-10-31). Every text it changed says "0.0.3".
+// 0.0.4 (31 October 2026) watches YouTube Music too (Marcos: YouTube Music next, likely the easiest;
+// decided in DESIGN.md of 2026-10-31) and shortens the coming-soon list to Facebook and Snapchat
+// (LINKEDIN-1). Every text it changed says "0.0.4".
 // tests/copy.test.ts checks the house style of every string here.
 
 /**
  * Bump only when what the disclosure says about apps already agreed to changes. Adding an app does
  * not bump it: the consent's app list decides per app (UPG-2). Equals Consent.DISCLOSURE_VERSION in Kotlin.
+ * 0.0.4 adds YouTube Music and one sentence about it only, so no bump (CONSENT-4).
  */
 export const DISCLOSURE_VERSION = 2;
 
@@ -29,16 +33,19 @@ export const text = {
 
   // Intro (explainer, spec 6.7 step 1). From spec 12.1, narrowed to the watched apps. The first
   // paragraph is 0.0.2, approved 2026-10-30 (DM-1 at its default: a Reel sent in a message is closed
-  // too), with X added in 0.0.3; the second paragraph is 0.0.3 (X-VIEW-1 a).
+  // too), with X added in 0.0.3 and YouTube Music in 0.0.4; the second paragraph is 0.0.3 (X-VIEW-1 a);
+  // the third is 0.0.4 (YTM-VIEW-1 a, YTM-LEAVE-1 a).
   introTitle: 'What StopScroll does',
   introBody: [
-    'StopScroll closes the endless short-video feeds in the YouTube, Instagram and X apps and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.',
+    'StopScroll closes the endless short-video feeds in the YouTube, Instagram, X and YouTube Music apps and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.',
     'In X, the feed is the full-screen video viewer, where you swipe up for the next video. X opens it when you tap a video in the timeline, a post, search or a profile, so StopScroll closes it there too. Videos still play in the timeline, in posts and in search.',
+    'In YouTube Music, the feed is Samples, the short video clips of songs where you swipe up for the next one. StopScroll closes it on the Samples tab, from the Samples button on an album or artist page, and from a link. It leaves Samples by pressing the app’s Home tab, or Back when the Home tab is already selected, so you stay in YouTube Music and the music you were playing can carry on. Songs, albums, playlists, music videos and the player keep working.',
     'No ads, no account, no server calls. StopScroll has no internet permission at all, so it never contacts a server, ours or anyone else’s.',
     'StopScroll is not an accessibility tool and not parental control: you can turn it off at any time.',
   ],
-  // 0.0.1 kit; 0.0.2, approved 2026-10-30: Instagram left the list; 0.0.3: X left it.
-  introNext: 'Coming soon: Facebook, Snapchat and LinkedIn. StopScroll does not watch them yet.',
+  // 0.0.1 kit; 0.0.2, approved 2026-10-30: Instagram left the list; 0.0.3: X left it. 0.0.4 added
+  // YouTube Music; the list is Facebook and Snapchat (LINKEDIN-1).
+  introNext: 'Coming soon: Facebook and Snapchat. StopScroll does not watch them yet.',
   turnOnButton: 'Turn on blocking',
 
   // The prominent disclosure (spec 12.3), for the apps this build watches. Changed for stage 1 part
@@ -47,16 +54,19 @@ export const text = {
   // 0.0.2, approved 2026-10-30 (DISCLOSURE_VERSION 2): "feeds" and "a Shorts or Reels player", spec 12.3's own
   // words; the apps come from the build's list ("the YouTube, Instagram or X app"). 0.0.3: "a
   // short-video feed" with X's viewer named, and the sentence on apps a later version adds (UPG-2).
+  // 0.0.4: YouTube Music's Samples joins the list of feeds, and "What it does" keeps its 0.0.3
+  // sentences word for word and adds one sentence about YouTube Music only (CONSENT-4: no bump;
+  // tests/copy.test.ts pins the version 2 sentences, and changing them needs a bump).
   disclosureTitle: 'StopScroll needs Accessibility access',
   disclosure: (apps: string): { lead: string | null; body: string }[] => [
     { lead: null, body: 'To find the short-video feeds, StopScroll uses Android’s Accessibility Service.' },
     {
       lead: 'What it looks at.',
-      body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether a short-video feed is open: the Shorts or Reels player, or X’s full-screen video viewer. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
+      body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether a short-video feed is open: the Shorts or Reels player, X’s full-screen video viewer or YouTube Music’s Samples. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
     },
     {
       lead: 'What it does.',
-      body: 'When a feed you chose to block opens, StopScroll presses Back for you, twice if needed. If that does not leave the feed, it presses one tab in the same app where there is one, then Home. It presses nothing else.',
+      body: 'When a feed you chose to block opens, StopScroll presses Back for you, twice if needed. If that does not leave the feed, it presses one tab in the same app where there is one, then Home. In YouTube Music it presses the app’s Home tab first, because on the Samples tab Back would close YouTube Music and leave your music paused (when the Home tab is already selected, it presses Back first); Back, the tab again and Home follow only if needed. It presses nothing else.',
     },
     {
       lead: 'What it keeps.',
@@ -103,7 +113,8 @@ export const text = {
   appNotInstalled: (name: string): string => `${name} is not installed on this phone, so there is nothing to close.`,
   // The coming-soon rows (0.0.1 kit, NEW). These apps are listed only: they are not in the
   // service's packageNames, so StopScroll receives nothing from them until a release adds them
-  // (0.0.2 added Instagram, 0.0.3 added X; Facebook, Snapchat and LinkedIn remain).
+  // (0.0.2 added Instagram, 0.0.3 added X, 0.0.4 added YouTube Music; the list is Facebook and
+  // Snapchat (LINKEDIN-1)).
   comingSoonLabel: 'Coming soon',
   comingSoonNote: 'StopScroll does not watch these apps yet. Each one comes in a later release, once its screens have been checked on a phone.',
 
@@ -121,9 +132,9 @@ export const text = {
   turnOffBody: 'StopScroll switches itself off in Android’s settings. You can turn it on again there at any time.',
   turnOff: 'Turn StopScroll off',
 
-  // Teaching panel (spec 12.4), narrowed to this build. NEW where it differs; "three apps" is 0.0.3.
+  // Teaching panel (spec 12.4), narrowed to this build. NEW where it differs; "four apps" is 0.0.4.
   teachTitle: 'Before you turn on Accessibility for any app',
-  teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: three apps; only Back, Home and one tab; no internet; its code is open source (MIT).',
+  teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: four apps; only Back, Home and one tab; no internet; its code is open source (MIT).',
 
   // Privacy notes (spec 8 and 6.1). NEW.
   privacyTitle: 'Privacy',
@@ -134,9 +145,9 @@ export const text = {
   ],
   privacyMore: 'More about privacy',
 
-  // Footer (spec 12.2). footerPermissions "three apps" is 0.0.3 (index.html and privacy.html carry the same line).
+  // Footer (spec 12.2). footerPermissions "four apps" is 0.0.4 (index.html and privacy.html carry the same line).
   footerCredits: 'Runs entirely on your device: our own code and the open-source parts listed in NOTICE. Nothing is sent.',
-  footerPermissions: 'Accessibility only, watching three apps. No internet. No ads. No tracking.',
+  footerPermissions: 'Accessibility only, watching four apps. No internet. No ads. No tracking.',
   footerOffline: 'Your settings and feed counts stay on this phone, nowhere else. Disconnect and try it.',
 
   // Website, where the page runs without the app (stage 4 writes the real website). NEW.
@@ -145,7 +156,7 @@ export const text = {
 
   // A version added an app the user has not agreed to yet (per-app consent, UPG-2, 0.0.3). The card
   // shows at the top of the setup and home screens; "Read and agree" opens the full disclosure,
-  // which names every watched app. [names] is "X", "X and Facebook", "X, Facebook and Snapchat".
+  // which names every watched app. [names] is "YouTube Music", "X and YouTube Music", "X, Facebook and Snapchat".
   pendingTitle: (names: string): string => `StopScroll now works with ${names} too.`,
   pendingBody: (names: string): string =>
     `StopScroll does not watch ${names} until you read the updated disclosure and agree. The apps you agreed to before keep working as they are.`,

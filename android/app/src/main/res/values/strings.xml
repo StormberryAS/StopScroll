@@ -2,14 +2,15 @@
 <!-- User-visible texts on the Android side. Approved by Marcos on 29 October 2026 (COPY-1), adapted to the
      stage 1 part one scope (YouTube only) from spec 12.4. 0.0.2 (30 October 2026) adds Instagram:
      service_description is spec 12.4's stage 1 wording, approved by Marcos on 30 October 2026. 0.0.3 (31 October 2026)
-     adds X; approved in DESIGN.md of 2026-10-31. British English, no em dashes. -->
+     adds X; approved in DESIGN.md of 2026-10-31. 0.0.4 (31 October 2026) adds YouTube Music; approved in
+     DESIGN.md of 2026-10-31. British English, no em dashes. -->
 <resources>
     <string name="app_name">StopScroll</string>
-    <!-- Android's own Accessibility settings page shows this. Spec 12.4's form (YouTube, Instagram and X since 0.0.3). -->
-    <string name="service_description">Closes the short-video feeds in YouTube, Instagram and X. Watches only those three apps. No internet access.</string>
-    <!-- %1$s is the feed name from the rules, for example YouTube Shorts, Instagram Reels or the X video feed. -->
+    <!-- Android's own Accessibility settings page shows this. Spec 12.4's form (YouTube, Instagram, X and YouTube Music since 0.0.4). -->
+    <string name="service_description">Closes the short-video feeds in YouTube, Instagram, X and YouTube Music. Watches only those four apps. No internet access.</string>
+    <!-- %1$s is the feed name from the rules, for example YouTube Shorts, Instagram Reels, the X video feed or YouTube Music Samples. -->
     <string name="toast_closed">StopScroll closed %1$s</string>
-    <!-- %1$s is the app name, for example YouTube, Instagram or X. -->
+    <!-- %1$s is the app name, for example YouTube, Instagram, X or YouTube Music. -->
     <string name="toast_paused">StopScroll paused for 30 seconds in %1$s. If this keeps happening, please tell us.</string>
     <string name="webview_too_old">This phone\'s WebView is too old for StopScroll\'s settings screen. Update Android System WebView and open StopScroll again.</string>
     <string name="no_app_for_link">No app on this phone can open that.</string>

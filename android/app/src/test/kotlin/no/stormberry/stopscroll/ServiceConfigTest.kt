@@ -43,34 +43,45 @@ class ServiceConfigTest {
     }
 
     @Test fun noCombinationEverGivesAnEmptyListAPackageOutsideTheWatchedOnesOrAnUnagreedApp() {
-        val three = listOf(yt, "com.instagram.android", "com.twitter.android")
+        val four = listOf(yt, "com.instagram.android", "com.twitter.android", "com.google.android.apps.youtube.music")
+        assertEquals(four, Repo.rules.packages)
         val choices = listOf<Mode?>(null) + Mode.entries
-        // Every subset of the three as the agreed apps.
-        val subsets = (0 until 8).map { bits -> three.filterIndexed { i, _ -> bits and (1 shl i) != 0 } }
+        // Every subset of the four as the agreed apps.
+        val subsets = (0 until 16).map { bits -> four.filterIndexed { i, _ -> bits and (1 shl i) != 0 } }
         var active = 0
-        for (a in choices) for (b in choices) for (c in choices) for (agreed in subsets) {
-            val modes = listOfNotNull(a?.let { three[0] to it }, b?.let { three[1] to it }, c?.let { three[2] to it }).toMap()
-            val p = ServiceConfig.plan(three, modes, agreed)
+        for (a in choices) for (b in choices) for (c in choices) for (d in choices) for (agreed in subsets) {
+            val modes = listOfNotNull(a?.let { four[0] to it }, b?.let { four[1] to it }, c?.let { four[2] to it }, d?.let { four[3] to it }).toMap()
+            val p = ServiceConfig.plan(four, modes, agreed)
             assertTrue("$modes $agreed", p.packages.isNotEmpty())
-            assertTrue("$modes $agreed", three.containsAll(p.packages))
+            assertTrue("$modes $agreed", four.containsAll(p.packages))
             if (p.active) {
                 active++
                 assertTrue("$modes $agreed", p.packages.all { modes[it] == Mode.ALWAYS && it in agreed })
                 // Exactly the agreed apps that are on: none is left out either.
-                assertEquals(three.filter { modes[it] == Mode.ALWAYS && it in agreed }, p.packages)
+                assertEquals(four.filter { modes[it] == Mode.ALWAYS && it in agreed }, p.packages)
             } else {
-                assertEquals("inactive keeps the full list", three, p.packages)
-                assertTrue(three.none { modes[it] == Mode.ALWAYS && it in agreed })
+                assertEquals("inactive keeps the full list", four, p.packages)
+                assertTrue(four.none { modes[it] == Mode.ALWAYS && it in agreed })
             }
         }
         assertTrue(active > 0)
     }
 
-    @Test fun youTubeInstagramAndXEachFollowTheirOwnMode() {
+    @Test fun youTubeInstagramXAndYouTubeMusicEachFollowTheirOwnMode() {
         val ig = "com.instagram.android"
         val x = "com.twitter.android"
+        val ytm = "com.google.android.apps.youtube.music"
+        val four = listOf(yt, ig, x, ytm)
+        assertEquals(four, Repo.rules.packages)
+        val onlyYtm = ServiceConfig.plan(four, mapOf(yt to Mode.OFF, ig to Mode.OFF, x to Mode.OFF, ytm to Mode.ALWAYS), four)
+        assertEquals(listOf(ytm), onlyYtm.packages)
+        assertTrue(ServiceConfig.mayRead(onlyYtm, ytm))
+        assertFalse("YouTube Music on does not open YouTube", ServiceConfig.mayRead(onlyYtm, yt))
+        val ytOnly = ServiceConfig.plan(four, mapOf(yt to Mode.ALWAYS, ig to Mode.OFF, x to Mode.OFF, ytm to Mode.OFF), four)
+        assertEquals(listOf(yt), ytOnly.packages)
+        assertFalse(ServiceConfig.mayRead(ytOnly, ytm))
+        // The 0.0.3 checks below run over the first three apps.
         val all = listOf(yt, ig, x)
-        assertEquals(all, Repo.rules.packages)
         assertEquals(all, ServiceConfig.plan(all, mapOf(yt to Mode.ALWAYS, ig to Mode.ALWAYS, x to Mode.ALWAYS), all).packages)
         val igOff = ServiceConfig.plan(all, mapOf(yt to Mode.ALWAYS, ig to Mode.OFF, x to Mode.ALWAYS), all)
         assertEquals(listOf(yt, x), igOff.packages)

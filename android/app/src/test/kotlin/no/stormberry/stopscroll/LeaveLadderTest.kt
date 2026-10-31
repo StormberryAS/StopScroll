@@ -5,7 +5,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The leave sequence and the loop guard, with an injected clock (spec 6.5, review F4). */
+/**
+ * The leave sequence and the loop guard, with an injected clock (spec 6.5, review F4). Two orders
+ * since 0.0.4: Back first (YouTube, Instagram, X) and the tab first (YouTube Music's Samples).
+ */
 class LeaveLadderTest {
     private var t = 1_000_000L
     private val ladder = LeaveLadder { t }
@@ -119,5 +122,99 @@ class LeaveLadderTest {
         ladder.reset()
         assertEquals(LadderStep.Nothing, ladder.onRecheck(true, true))
         assertEquals(LeaveAction.BACK, press(ladder.onFeedSeen()))
+    }
+
+    // THE TAB FIRST (0.0.4, YTM-LEAVE-1 a): the tab, Back, the tab, Home, with the same guard.
+
+    private val tabFirst = LeaveOrder.OTHER_TAB_FIRST
+
+    private fun failedTabFirstRun(): LadderStep {
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onFeedSeen(tabFirst)))
+        t += 700
+        assertEquals(LeaveAction.BACK, press(ladder.onRecheck(true, true)))
+        t += 700
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onRecheck(true, true)))
+        t += 700
+        assertEquals(LeaveAction.HOME, press(ladder.onRecheck(true, true)))
+        t += 700
+        return ladder.onRecheck(true, true)
+    }
+
+    @Test fun theTabFirstOrderIsTabBackTabHomeWith700MsBetweenAndTheSameThreeActions() {
+        assertEquals(LadderStep.Press(LeaveAction.OTHER_TAB, 700, startsRun = true), ladder.onFeedSeen(tabFirst))
+        assertEquals(LadderStep.Nothing, ladder.onFeedSeen(tabFirst))
+        assertEquals(LadderStep.Nothing, ladder.onFeedSeen(LeaveOrder.BACK_FIRST)) // a run under way keeps its order
+        t += 700
+        assertEquals(LadderStep.Press(LeaveAction.BACK, 700, startsRun = false), ladder.onRecheck(true, true))
+        t += 700
+        assertEquals(LadderStep.Press(LeaveAction.OTHER_TAB, 700, startsRun = false), ladder.onRecheck(true, true))
+        t += 700
+        assertEquals(LadderStep.Press(LeaveAction.HOME, 700, startsRun = false), ladder.onRecheck(true, true))
+        t += 700
+        assertEquals(LadderStep.Failed(paused = false), ladder.onRecheck(true, true))
+        assertFalse(ladder.isRunning())
+        // At most four presses, Home last, and nothing but the three actions.
+        assertEquals(listOf("BACK_FIRST", "OTHER_TAB_FIRST"), LeaveOrder.entries.map { it.name })
+    }
+
+    @Test fun theTabThatLeavesSamplesEndsTheRunAtOnce() {
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onFeedSeen(tabFirst)))
+        t += 700
+        assertEquals(LadderStep.Closed, ladder.onRecheck(false, true))
+        assertFalse(ladder.isRunning())
+    }
+
+    @Test fun aTabMissingAtStep1IsBackStillStartingTheRun() {
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onFeedSeen(tabFirst)))
+        // The run's message shows once: the Back that replaces the tab is still the start of the run.
+        assertEquals(LadderStep.Press(LeaveAction.BACK, 700, startsRun = true), ladder.otherTabUnavailable())
+        t += 700
+        assertEquals(LeaveAction.BACK, press(ladder.onRecheck(true, true)))
+        t += 700
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onRecheck(true, true)))
+        // Missing again at step 3: Home, and no fourth press.
+        assertEquals(LadderStep.Press(LeaveAction.HOME, 700, startsRun = false), ladder.otherTabUnavailable())
+        t += 700
+        assertEquals(LadderStep.Failed(paused = false), ladder.onRecheck(true, true))
+    }
+
+    @Test fun aTabMissingOnlyAtStep3IsHomeAndTheRunIsJudged() {
+        ladder.onFeedSeen(tabFirst); t += 700
+        ladder.onRecheck(true, true); t += 700
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onRecheck(true, true)))
+        assertEquals(LeaveAction.HOME, press(ladder.otherTabUnavailable()))
+        t += 700
+        assertEquals(LadderStep.Closed, ladder.onRecheck(false, true))
+    }
+
+    @Test fun backFirstNeverAnswersAMissingTabBeforeStep3() {
+        assertEquals(LeaveAction.BACK, press(ladder.onFeedSeen()))
+        assertEquals(LadderStep.Nothing, ladder.otherTabUnavailable())
+        t += 700
+        ladder.onRecheck(true, true)
+        assertEquals(LadderStep.Nothing, ladder.otherTabUnavailable())
+    }
+
+    @Test fun theLoopGuardIsTheSameForTheTabFirstOrder() {
+        assertEquals(LadderStep.Failed(paused = false), failedTabFirstRun())
+        t += 1_000
+        assertEquals(LadderStep.Failed(paused = true), failedTabFirstRun())
+        assertTrue(ladder.isPaused())
+        assertEquals(LadderStep.Nothing, ladder.onFeedSeen(tabFirst))
+        t += 30_000
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onFeedSeen(tabFirst)))
+        t += 700
+        // A run that works (the tab landed on Home) resets the count.
+        assertEquals(LadderStep.Closed, ladder.onRecheck(false, true))
+        assertEquals(LadderStep.Failed(paused = false), failedTabFirstRun())
+        assertFalse(ladder.isPaused())
+    }
+
+    @Test fun aRunAfterATabFirstRunStartsInItsOwnOrder() {
+        ladder.onFeedSeen(tabFirst); t += 700
+        assertEquals(LadderStep.Closed, ladder.onRecheck(false, true))
+        assertEquals(LeaveAction.BACK, press(ladder.onFeedSeen(LeaveOrder.BACK_FIRST)))
+        ladder.reset()
+        assertEquals(LeaveAction.OTHER_TAB, press(ladder.onFeedSeen(tabFirst)))
     }
 }

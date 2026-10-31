@@ -88,6 +88,64 @@ class Fixture(val rel: String) {
             .map { it.getAttribute("resource-id").removePrefix("$app:id/") }
     }
 
+    /** How many nodes sit on each of the first [depth] levels under the first node with [id] (empty when there is none). */
+    fun levelSizes(id: String, depth: Int): List<Int> {
+        fun find(e: Element): Element? {
+            if (e.tagName == "node" && e.getAttribute("resource-id") == "$app:id/$id") return e
+            val kids = e.childNodes
+            for (i in 0 until kids.length) (kids.item(i) as? Element)?.let(::find)?.let { return it }
+            return null
+        }
+        var level = listOf(find(doc) ?: return emptyList())
+        return (1..depth).map {
+            level = level.flatMap { children(it) }
+            level.size
+        }
+    }
+
+    /** The node with [id] (this app's namespace), the first in document order, or null. */
+    private fun byId(id: String): Element? {
+        fun find(e: Element): Element? {
+            if (e.tagName == "node" && e.getAttribute("resource-id") == "$app:id/$id") return e
+            val kids = e.childNodes
+            for (i in 0 until kids.length) (kids.item(i) as? Element)?.let(::find)?.let { return it }
+            return null
+        }
+        return find(doc)
+    }
+
+    /** The tab row under [id]: the first of its first [depth] levels with at least three nodes (empty when none). */
+    private fun tabRow(id: String, depth: Int): List<Element> {
+        var level = listOf(byId(id) ?: return emptyList())
+        repeat(depth) {
+            level = level.flatMap { children(it) }
+            if (level.size >= 3) return level
+        }
+        return emptyList()
+    }
+
+    /** The indexes of the selected tabs in the tab row under [id]. */
+    fun selectedTabs(id: String, depth: Int): List<Int> =
+        tabRow(id, depth).withIndex().filter { it.value.getAttribute("selected") == "true" }.map { it.index }
+
+    /**
+     * Runs the service's TabPick over the tree under [id]: the index in the tab row of the node it would
+     * press, -1 for a node outside the row, or null for no press. A capture keeps no `clickable`, so it is
+     * modelled as the raw dumps show it (31 October 2026): a tab of the row is clickable unless it is the
+     * selected one ([selectedOverride], when given, plays the selected tab instead); nothing else is.
+     */
+    fun pickTab(id: String, way: String, depth: Int, selectedOverride: Int? = null): Int? {
+        val parent = byId(id) ?: return null
+        val row = tabRow(id, depth)
+        fun clickable(e: Element): Boolean {
+            val i = row.indexOf(e)
+            if (i < 0) return false
+            return if (selectedOverride != null) i != selectedOverride else e.getAttribute("selected") != "true"
+        }
+        val picked = TabPick.pick(parent, way, depth, { children(it).size }, { e, i -> children(e).getOrNull(i) }, ::clickable, { true }) ?: return null
+        return row.indexOf(picked)
+    }
+
     /** How many levels under the node with [id] the first node of [className] sits, or null. */
     fun depthOfFirst(id: String, className: String): Int? {
         fun find(e: Element): Element? {

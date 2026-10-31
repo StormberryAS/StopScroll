@@ -2,6 +2,20 @@
 
 StopScroll for Android, newest first. The release text of each version, which GitHub Releases and Zapstore show, is in `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
 
+## 0.0.4 (versionCode 4)
+
+StopScroll now closes YouTube Music's Samples too, the feed of short video clips of songs, and leaves the rest of YouTube Music working: Home, Explore, the library, search, albums, artists, playlists, songs, music videos and the player.
+
+- YouTube Music joins the list as a normal row: Off or Always block. Facebook and Snapchat stay coming soon.
+- Closed: Samples on the Samples tab, from the Samples button on an album or artist page, and from a link. The full player stays open, also when you open it from a Sample.
+- How: Samples uses the same kind of player as YouTube Shorts (its view IDs start with `reel_`), so the rule looks for three of those view IDs (`reel_recycler`, `reel_watch_player` or `reel_player_page_container`, at least 60% of the screen high), and the full player (`player_page`, at least 90% high) always wins.
+- Leaving Samples: on the Samples tab, Back closes YouTube Music and leaves your music paused. So in YouTube Music StopScroll presses the app's Home tab first, and YouTube Music carries on with the music you were playing. When the Home tab is already selected (Samples opened from an album or artist page you reached from Home), it presses Back first, which takes you back to that page. Back, the tab again and Home follow only if needed, with the same loop guard. A surface in the rules can now say `"leave": "otherTabFirst"`, and a tab can be `"child": "first"` (the first tab, and none while it is the selected one), so the rules file is schema 3. YouTube, Instagram and X leave as before.
+- After the update from 0.0.3, YouTube, Instagram and X keep working as you set them, and YouTube Music waits until you open StopScroll and agree; until then StopScroll's code receives nothing from YouTube Music. From 0.0.2, X and YouTube Music wait. An agreement from 0.0.1 still does not count.
+- The service's app list, the package query list, the rules and the release workflow's pinned list cover exactly YouTube, Instagram, X and YouTube Music.
+- 41 sanitised YouTube Music captures (YouTube Music 9.43.51, Android 17) join the others in `tests/fixtures/`, and the Kotlin tests run the rules over every one of them.
+- The store description, the screenshots and this release's note are the same on Zapstore and Google Play.
+- Google Play edition: versionName 0.0.4, versionCode 1004. 1003 is never uploaded: the next Play upload is 1004.
+
 ## 0.0.3 (versionCode 3)
 
 StopScroll now closes X's full-screen video viewer too, the endless video feed X opens when you tap a video, and leaves the rest of X working: the timeline, posts, search, notifications, messages and profiles.

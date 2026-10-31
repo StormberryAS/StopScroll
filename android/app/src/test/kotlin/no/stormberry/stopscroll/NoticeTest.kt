@@ -15,6 +15,7 @@ class NoticeTest {
     private val youTube = Repo.rules.apps.single { it.id == "youtube" }
     private val instagram = Repo.rules.apps.single { it.id == "instagram" }
     private val x = Repo.rules.apps.single { it.id == "x" }
+    private val ytMusic = Repo.rules.apps.single { it.id == "ytmusic" }
 
     /** strings.xml's text for [kind], formatted as Android's getString(id, name) does. */
     private fun words(request: NoticeRequest): String {
@@ -36,6 +37,10 @@ class NoticeTest {
         assertEquals("StopScroll closed Instagram Reels", words(Notices.forStep(instagram, step)!!))
         assertEquals(NoticeRequest(NoticeKind.CLOSED, "the X video feed"), Notices.forStep(x, step))
         assertEquals("StopScroll closed the X video feed", words(Notices.forStep(x, step)!!))
+        assertEquals("StopScroll closed YouTube Music Samples", words(Notices.forStep(ytMusic, step)!!))
+        // In YouTube Music the run starts with the tab (0.0.4), or with Back when the tab is missing: the same message once.
+        val tabStart = LadderStep.Press(LeaveAction.OTHER_TAB, 700, startsRun = true)
+        assertEquals(NoticeRequest(NoticeKind.CLOSED, "YouTube Music Samples"), Notices.forStep(ytMusic, tabStart))
     }
 
     @Test fun theLoopGuardsPauseShowsThePauseMessageWithTheAppName() {
@@ -52,6 +57,10 @@ class NoticeTest {
         assertEquals(
             "StopScroll paused for 30 seconds in X. If this keeps happening, please tell us.",
             words(Notices.forStep(x, step)!!),
+        )
+        assertEquals(
+            "StopScroll paused for 30 seconds in YouTube Music. If this keeps happening, please tell us.",
+            words(Notices.forStep(ytMusic, step)!!),
         )
     }
 

@@ -27,11 +27,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 // The reviewed screen tags per app (FX-2, 31 October 2026): every tag seen on X 12.38.1. Instagram's
 // list is empty: its capture blanks its few Compose tags first (FX-1), and no rule needs them.
-// tests/fixtures.test.ts reads this list from this file; keep it on one line per app.
+// YouTube Music 9.43.51 (0.0.4) is a View app: no dump of 31 October 2026 holds a bare tag, so its list
+// is empty too. tests/fixtures.test.ts reads this list from this file; keep it on one line per app.
 const REVIEWED_TAGS: Record<string, readonly string[]> = {
   'com.google.android.youtube': [],
   'com.instagram.android': [],
   'com.twitter.android': ['MainLanding', 'scaffold_home_tabbed', 'home_navigation_bar_title', 'timeline_post', 'VideoTab', 'PostDetail', 'post-detail-reply-text-field', 'MediaGallery', 'Search', 'NotificationTabbed', 'UserProfileScreen', 'xchat_pin_entry', 'facepile', 'ntp'],
+  'com.google.android.apps.youtube.music': [],
 };
 const BARE_TAG = /^[A-Za-z][A-Za-z0-9_-]{0,79}$/;
 const NAME_REMOVED = /^[a-z][a-z0-9_.]*:id\/\(name removed\)$/;

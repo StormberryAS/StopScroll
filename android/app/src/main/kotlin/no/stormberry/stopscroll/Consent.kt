@@ -9,7 +9,8 @@ package no.stormberry.stopscroll
  * not watched until the user reads the disclosure, which names every watched app, and agrees again:
  * the service receives nothing from it (while blocking is active the app is left out of the runtime
  * packageNames; otherwise the event types are 0 and the service receives no events at all). So 0.0.2 to 0.0.3 keeps YouTube and Instagram
- * blocking, and X waits.
+ * blocking, and X waits; 0.0.3 to 0.0.4 keeps YouTube, Instagram and X blocking, and YouTube Music
+ * waits (CONSENT-4: 0.0.4 adds one sentence about YouTube Music only, so no version bump).
  *
  * DISCLOSURE_VERSION: bump it only when what the disclosure says about apps already agreed to changes
  * (what it reads, does or keeps, or the "Other apps" rule). Adding an app does not bump it: the

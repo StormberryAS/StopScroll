@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   StopScroll's Accessibility Service, stage 1 (spec 6.1): YouTube since 0.0.1, Instagram since 0.0.2
-  (captured 2026-10-30), X since 0.0.3 (captured 2026-10-31); Facebook waits.
+  (captured 2026-10-30), X since 0.0.3 (captured 2026-10-31), YouTube Music since 0.0.4 (captured
+  2026-10-31); Facebook waits.
 
   At run time FeedService narrows this list to the apps that are on AND agreed to (per-app consent,
   0.0.3): an app the user has not agreed to never reaches the service while it is active.
@@ -12,8 +13,8 @@
   notificationTimeout 0: a value above 0 only delays every event (AOSP notifyAccessibilityEvent);
     FeedService throttles content changes itself.
   canRetrieveWindowContent and flagReportViewIds: Shorts opens inside YouTube's main activity and
-    Reels inside Instagram's (MainTabActivity, also for Stories and Explore), so only the view IDs
-    tell them apart. X names its screens with Compose test tags, which it reports as view IDs; the
+    Reels inside Instagram's (MainTabActivity, also for Stories and Explore), and YouTube Music's
+    Samples inside its main activity too, so only the view IDs tell them apart. X names its screens with Compose test tags, which it reports as view IDs; the
     same flag carries them, and NodeFacts finds them with a short walk (TagWalk.kt).
   isAccessibilityTool false, always: StopScroll is not an accessibility tool.
   Not requested: interactive windows, not-important views, gestures, screenshots, key events.
@@ -21,7 +22,7 @@
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
-    android:packageNames="com.google.android.youtube,com.instagram.android,com.twitter.android"
+    android:packageNames="com.google.android.youtube,com.instagram.android,com.twitter.android,com.google.android.apps.youtube.music"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagReportViewIds"
     android:canRetrieveWindowContent="true"

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- StopScroll test fixture. SANITISED by tools/scrub-fixture.ts: every text, content-desc and hint
+     was removed, with every attribute except class, resource-id, bounds and selected. The tree
+     structure is kept as captured. The raw capture holds personal on-screen text and never enters
+     this repository. -->
+<fixture app="com.google.android.apps.youtube.music" label="ytmusic-nowplaying-song-2" expect="allow" captured="2026-10-31" device="Pixel, Android 17" android="17" source="uiautomator">
+  <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+    <node class="android.widget.FrameLayout" resource-id="com.google.android.apps.youtube.music:id/accessibility_layer_container" bounds="[0,0][1080,2410]" selected="false">
+      <node class="android.view.ViewGroup" resource-id="com.google.android.apps.youtube.music:id/watch_while_layout" bounds="[0,0][1080,2410]" selected="false">
+        <node class="android.view.ViewGroup" resource-id="com.google.android.apps.youtube.music:id/player_page" bounds="[0,0][1080,2410]" selected="false">
+          <node class="android.widget.FrameLayout" resource-id="com.google.android.apps.youtube.music:id/music_playback_controls" bounds="[0,1725][1080,2040]" selected="false">
+            <node class="android.widget.SeekBar" resource-id="com.google.android.apps.youtube.music:id/time_bar" bounds="[0,1725][1080,1788]" selected="false" />
+            <node class="android.widget.Button" resource-id="com.google.android.apps.youtube.music:id/playback_queue_shuffle_button_view" bounds="[53,1861][179,1987]" selected="false" />
+            <node class="android.widget.ImageView" resource-id="com.google.android.apps.youtube.music:id/player_control_previous_button" bounds="[233,1861][359,1987]" selected="false" />
+            <node class="android.widget.ImageView" resource-id="com.google.android.apps.youtube.music:id/player_control_play_pause_replay_button" bounds="[445,1830][634,2019]" selected="false" />
+            <node class="android.widget.ImageView" resource-id="com.google.android.apps.youtube.music:id/player_control_next_button" bounds="[720,1861][846,1987]" selected="false" />
+            <node class="android.widget.Button" resource-id="com.google.android.apps.youtube.music:id/playback_queue_loop_button_view" bounds="[901,1861][1027,1987]" selected="false" />
+          </node>
+          <node class="android.widget.FrameLayout" resource-id="com.google.android.apps.youtube.music:id/player_top_section" bounds="[0,172][1080,351]" selected="false">
+            <node class="android.widget.ImageView" resource-id="com.google.android.apps.youtube.music:id/player_collapse_button" bounds="[22,172][148,298]" selected="false" />
+            <node class="android.widget.RelativeLayout" resource-id="com.google.android.apps.youtube.music:id/audio_video_switch_toggle" bounds="[351,172][729,298]" selected="false">
+              <node class="android.widget.TextView" resource-id="com.google.android.apps.youtube.music:id/song_text" bounds="[351,172][540,298]" selected="false" />
+              <node class="android.widget.TextView" resource-id="com.google.android.apps.youtube.music:id/video_text" bounds="[540,172][729,298]" selected="false" />
+            </node>
+            <node class="android.widget.ImageView" resource-id="com.google.android.apps.youtube.music:id/contextual_menu" bounds="[932,172][1058,298]" selected="false" />
+          </node>
+          <node class="android.widget.LinearLayout" resource-id="com.google.android.apps.youtube.music:id/current_song_view" bounds="[0,1378][1080,1520]" selected="false">
+            <node class="android.widget.TextView" resource-id="com.google.android.apps.youtube.music:id/title" bounds="[84,1378][996,1463]" selected="true" />
+            <node class="android.widget.TextView" resource-id="com.google.android.apps.youtube.music:id/artist" bounds="[84,1463][266,1520]" selected="false" />
+          </node>
+          <node class="android.widget.FrameLayout" resource-id="com.google.android.apps.youtube.music:id/video_action_bar" bounds="[0,1557][1080,1683]" selected="false">
+            <node class="android.support.v7.widget.RecyclerView" resource-id="" bounds="[0,1557][1080,1683]" selected="false">
+              <node class="android.view.ViewGroup" resource-id="" bounds="[56,1573][299,1668]" selected="false" />
+              <node class="android.view.ViewGroup" resource-id="" bounds="[302,1573][429,1668]" selected="false" />
+              <node class="android.view.ViewGroup" resource-id="" bounds="[453,1573][675,1668]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="" bounds="[453,1573][654,1668]" selected="false">
+                  <node class="android.widget.ImageView" resource-id="" bounds="[488,1589][551,1652]" selected="false" />
+                </node>
+              </node>
+              <node class="android.view.ViewGroup" resource-id="" bounds="[675,1573][935,1668]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="" bounds="[675,1573][914,1668]" selected="false" />
+              </node>
+              <node class="android.view.ViewGroup" resource-id="" bounds="[935,1573][1080,1668]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="" bounds="[935,1573][1080,1668]" selected="false" />
+              </node>
+            </node>
+          </node>
+          <node class="android.widget.FrameLayout" resource-id="com.google.android.apps.youtube.music:id/watch_fragment" bounds="[84,256][996,1168]" selected="false">
+            <node class="android.view.ViewGroup" resource-id="" bounds="[84,382][996,1294]" selected="false" />
+          </node>
+          <node class="android.widget.LinearLayout" resource-id="com.google.android.apps.youtube.music:id/player_bottom_sheet" bounds="[0,2125][1080,2410]" selected="false">
+            <node class="android.widget.LinearLayout" resource-id="com.google.android.apps.youtube.music:id/bottom_sheet_tabbed_view" bounds="[0,2168][1080,2410]" selected="false">
+              <node class="android.widget.HorizontalScrollView" resource-id="" bounds="[42,2168][1038,2294]" selected="false">
+                <node class="android.widget.LinearLayout" resource-id="" bounds="[193,2168][886,2294]" selected="true">
+                  <node class="android.widget.TextView" resource-id="" bounds="[225,2190][854,2271]" selected="true" />
+                </node>
+              </node>
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</fixture>

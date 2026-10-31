@@ -3,7 +3,7 @@ import java.io.FileInputStream
 import java.util.Properties
 import javax.inject.Inject
 
-// StopScroll for Android, 0.0.1 (spec 15, stage 3); 0.0.2 adds Instagram; 0.0.3 adds X. The Labs WebView
+// StopScroll for Android, 0.0.1 (spec 15, stage 3); 0.0.2 adds Instagram; 0.0.3 adds X; 0.0.4 adds YouTube Music. The Labs WebView
 // template (GDPRLetterBuilder, EclipseTracker):
 //   - The web app at the repository root (index.html and what it loads) is copied into the APK's
 //     assets byte for byte, with one injected line that loads the Android bridge; verifyWebAssets
@@ -54,7 +54,7 @@ val canSignRelease = releaseStoreFile != null && file(releaseStoreFile).exists()
 // Google re-signs with an app signing key it holds. Two package names are two apps to Android: they
 // install side by side and neither can ever update the other, so nothing that happens on Play can
 // reach a Zapstore install. The Play edition has the SAME features as the sovereign one (YouTube
-// and Instagram since 0.0.2, X since 0.0.3, no permission at all): only the application ID, the versionCode and the signing key differ.
+// and Instagram since 0.0.2, X since 0.0.3, YouTube Music since 0.0.4, no permission at all): only the application ID, the versionCode and the signing key differ.
 // No product flavours (a flavour-level signingConfig is overridden by the build type's, and a flavour
 // dimension renames every task and breaks the workflow's APK path and the Zapstore pattern).
 val playBuild = when (providers.gradleProperty("playBuild").orNull?.lowercase()) {
@@ -216,12 +216,12 @@ android {
         // ONE VISIBLE VERSION, TWO CODE LINES. The sovereign versionCode and versionName on the next
         // lines are the only numbers bumped by hand; Zapstore codes stay below 1000. The Play build
         // derives its code from them and shows the same name:
-        //   Play versionCode = 1000 + sovereign versionCode   (0.0.3 code 3 -> code 1003)
-        //   Play versionName = sovereign versionName          (0.0.3 -> 0.0.3)
+        //   Play versionCode = 1000 + sovereign versionCode   (0.0.4 code 4 -> code 1004)
+        //   Play versionName = sovereign versionName          (0.0.4 -> 0.0.4)
         // Every Play upload is built from a sovereign release tag that shipped on GitHub Releases.
-        // 0.0.3 adds X.
-        versionCode = 3
-        versionName = "0.0.3"
+        // 0.0.4 adds YouTube Music.
+        versionCode = 4
+        versionName = "0.0.4"
         if (playBuild) {
             versionCode = PLAY_VERSION_CODE_OFFSET + versionCode!!
         }

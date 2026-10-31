@@ -10,7 +10,7 @@ import org.junit.Test
 /**
  * The rule engine over SANITISED fixtures of real screens (Pixel, Android 17): YouTube captured on
  * 2026-10-29, Instagram 453 on 2026-10-30, X 12.38.1 on 2026-10-31 (its tags found by the very
- * TagWalk the service runs).
+ * TagWalk the service runs), YouTube Music 9.43.51 on 2026-10-31.
  */
 class ScreenRulesTest {
     private val rules = Repo.rules
@@ -18,10 +18,14 @@ class ScreenRulesTest {
     private val fixtures = Fixture.all("tests/fixtures/youtube")
     private val igFixtures = Fixture.all("tests/fixtures/instagram")
     private val xFixtures = Fixture.all("tests/fixtures/x")
+    private val ytmFixtures = Fixture.all("tests/fixtures/ytmusic")
+    private val everyFixture get() = fixtures + igFixtures + xFixtures + ytmFixtures
 
-    @Test fun theRulesFileParsesAndCoversYouTubeInstagramAndXOnly() {
-        assertEquals(2, rules.schema)
-        assertEquals(listOf(yt, IG, X), rules.packages)
+    @Test fun theRulesFileParsesAndCoversYouTubeInstagramXAndYouTubeMusicOnly() {
+        assertEquals(3, rules.schema)
+        assertEquals(listOf(yt, IG, X, YTM), rules.packages)
+        assertEquals(emptySet<String>(), rules.app(YTM)!!.referencedTags)
+        assertEquals(setOf("reel_recycler", "reel_watch_player", "reel_player_page_container", "player_page"), rules.app(YTM)!!.referencedIds)
         assertEquals(emptySet<String>(), rules.app(yt)!!.referencedTags)
         assertEquals(emptySet<String>(), rules.app(IG)!!.referencedTags)
         assertEquals(emptySet<String>(), rules.app(X)!!.referencedIds)
@@ -41,7 +45,10 @@ class ScreenRulesTest {
         assertEquals("the eight YouTube captures", 8, fixtures.size)
         assertEquals("the eighteen Instagram captures", 18, igFixtures.size)
         assertEquals("the twenty-two X captures", 22, xFixtures.size)
-        for (f in fixtures + igFixtures + xFixtures) {
+        assertEquals("the forty-one YouTube Music captures", 41, ytmFixtures.size)
+        assertEquals("89 captures in all", 89, everyFixture.size)
+        assertEquals(34, everyFixture.count { it.expect == "block" })
+        for (f in everyFixture) {
             val verdict = rules.evaluate(f.snapshot())
             when (f.expect) {
                 "block" -> assertNotNull("${f.label} must be blocked", verdict)
@@ -101,7 +108,7 @@ class ScreenRulesTest {
 
     @Test fun excludesWinOverAMatch() {
         val r = ScreenRules.parse(
-            """{"schema":2,"rulesVersion":"t","date":"2026-10-29","apps":[{"id":"x","package":"com.example.x","name":"X","feedName":"X feed",
+            """{"schema":3,"rulesVersion":"t","date":"2026-10-29","apps":[{"id":"x","package":"com.example.x","name":"X","feedName":"X feed",
                "surfaces":[{"id":"feed","match":{"node":{"id":"feed"}},"exclude":[{"node":{"id":"chat"}}]}],
                "verifiedOn":[{"device":"d","android":"17","appVersionName":"1","appVersionCode":1,"date":"2026-10-29","how":"h"}]}]}""",
         )
@@ -113,8 +120,9 @@ class ScreenRulesTest {
     @Test fun theParserRefusesWhatItDoesNotKnow() {
         val ok = Repo.file("rules/screen-rules.json").readText()
         assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"minHeight\"", "\"minHieght\"")) }
-        assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"schema\": 2", "\"schema\": 1")) }
-        assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"schema\": 2", "\"schema\": 3")) }
+        assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"schema\": 3", "\"schema\": 1")) }
+        assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"schema\": 3", "\"schema\": 2")) }
+        assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"schema\": 3", "\"schema\": 4")) }
         // A tag is a plain name: no package, no colon, no wildcard; a view ID never takes a hyphen.
         assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"VideoTab\"", "\"com.twitter.android:id/VideoTab\"")) }
         assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"VideoTab\"", "\"Video*\"")) }
@@ -123,7 +131,7 @@ class ScreenRulesTest {
         assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("\"any\"", "\"some\"")) }
         assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace("reel_watch_player", "reel_*")) }
         assertThrows(IllegalArgumentException::class.java) {
-            ScreenRules.parse("""{"schema":2,"rulesVersion":"t","date":"2026-10-29","apps":[]}""")
+            ScreenRules.parse("""{"schema":3,"rulesVersion":"t","date":"2026-10-29","apps":[]}""")
         }
     }
 
@@ -381,10 +389,19 @@ class ScreenRulesTest {
         // YouTube's and Instagram's feeds as X snapshots: no verdict.
         assertNull(rules.evaluate(fixtures.first { it.expect == "block" }.snapshot().copy(packageName = X)))
         assertNull(rules.evaluate(ig("instagram-reel-feed-1").snapshot().copy(packageName = X)))
-        // Every fixture of every app, read with the rules of every other app: never a verdict.
-        for (f in fixtures + igFixtures + xFixtures) {
+        // Every fixture of every app, read with the rules of every other app: never a verdict. YouTube
+        // and YouTube Music are the one pair that shares view IDs (Samples is YouTube's Shorts player),
+        // so between those two a verdict, if any, is always the relabelled app's own: the rules are
+        // chosen by the window's package, never by the IDs (F10 of 0.0.4).
+        val shortsPlayers = setOf(yt, YTM)
+        for (f in everyFixture) {
             for (other in rules.packages.filter { it != f.app }) {
-                assertNull("${f.label} as $other", rules.evaluate(f.snapshot().copy(packageName = other)))
+                val v = rules.evaluate(f.snapshot().copy(packageName = other))
+                if (f.app in shortsPlayers && other in shortsPlayers) {
+                    assertTrue("${f.label} as $other", v == null || v.app.packageName == other)
+                } else {
+                    assertNull("${f.label} as $other", v)
+                }
             }
         }
     }
@@ -400,7 +417,204 @@ class ScreenRulesTest {
         assertEquals(listOf("PostDetail"), x("x-post-1").snapshot().nodes.map { it.id })
         assertTrue("MainLanding is not named by a rule", x("x-home-1").snapshot().nodes.isEmpty())
     }
+
+    // YOUTUBE MUSIC (0.0.4). Samples uses the same kind of player as YouTube Shorts (reel_ view IDs), and
+    // is closed on every entry captured: the Samples tab, an album's or artist's Samples button and a
+    // link; the full player (player_page at least 0.9 high) always wins.
+
+    private fun ytm(label: String) = ytmFixtures.single { it.label == label }
+
+    @Test fun youTubeMusicSamplesIsClosedOnEveryEntryCaptured() {
+        val samples = listOf(
+            "ytmusic-samples-tab-1", "ytmusic-samples-tab-2", "ytmusic-samples-tab-3", "ytmusic-samples-tab-4",
+            "ytmusic-samples-tab-5", "ytmusic-samples-tab-6", "ytmusic-samples-tab-7", "ytmusic-samples-tab-8",
+            "ytmusic-samples-comments-1", "ytmusic-samples-album-1", "ytmusic-samples-album-2", "ytmusic-samples-artist-1",
+            "ytmusic-samples-artist-2", "ytmusic-samples-artist-3", "ytmusic-samples-link-1",
+        )
+        assertEquals(samples.sorted(), ytmFixtures.filter { it.expect == "block" }.map { it.label }.sorted())
+        samples.forEach { assertEquals(it, "samples", rules.evaluate(ytm(it).snapshot())?.surfaceId) }
+        val app = rules.app(YTM)!!
+        assertEquals("YouTube Music", app.name)
+        assertEquals("YouTube Music Samples", app.feedName)
+    }
+
+    @Test fun youTubeMusicsSongsVideosPlayerAndPagesStayOpen() {
+        val allowed = listOf(
+            "ytmusic-home-1", "ytmusic-home-2", "ytmusic-home-3", "ytmusic-home-miniplayer-1", "ytmusic-home-after-samples-1",
+            "ytmusic-explore-1", "ytmusic-explore-2", "ytmusic-explore-miniplayer-1", "ytmusic-library-1", "ytmusic-library-miniplayer-1",
+            "ytmusic-playlist-1", "ytmusic-search-1", "ytmusic-search-2", "ytmusic-album-1", "ytmusic-album-2", "ytmusic-artist-1",
+            "ytmusic-artist-2", "ytmusic-nowplaying-song-1", "ytmusic-nowplaying-song-2", "ytmusic-nowplaying-video-1",
+            "ytmusic-nowplaying-video-2", "ytmusic-queue-1", "ytmusic-lyrics-1", "ytmusic-music-video-1",
+            "ytmusic-player-over-samples-1", "ytmusic-player-over-samples-2",
+        )
+        assertEquals(allowed.sorted(), ytmFixtures.filter { it.expect == "allow" }.map { it.label }.sorted())
+        allowed.forEach { assertNull(it, rules.evaluate(ytm(it).snapshot())) }
+    }
+
+    @Test fun theFullPlayerOverSamplesStaysOpenAndSamplesUnderTheMinimisedPlayerCloses() {
+        // The trap (F5): a Sample's "Play" opens the full player over the Samples tab, and the whole
+        // Samples tree stays under it. Without the exclusion StopScroll would close the song the user chose.
+        val over = ytm("ytmusic-player-over-samples-1")
+        val snap = over.snapshot()
+        assertTrue(snap.nodes.any { it.id == "reel_recycler" && it.height >= 0.6 })
+        assertTrue(snap.nodes.any { it.id == "player_page" && it.height >= 0.9 })
+        assertNull(rules.evaluate(snap))
+        assertEquals("samples", rules.evaluate(snap.copy(nodes = snap.nodes.filter { it.id != "player_page" }))?.surfaceId)
+        // Minimised back to Samples (F6): Samples plays again and closes.
+        assertEquals("samples", rules.evaluate(ytm("ytmusic-samples-tab-8").snapshot())?.surfaceId)
+    }
+
+    @Test fun theMiniPlayerNeverReachesTheExclusionAndTheFullPlayerAlwaysDoes() {
+        // F4: the mini player is player_page at 0.15 and holds no reel_ ID; the full player is 1.0 high.
+        for (f in ytmFixtures.filter { it.expect == "allow" }) {
+            val pages = f.snapshot().nodes.filter { it.id == "player_page" }
+            assertTrue(f.label, pages.isNotEmpty())
+            assertTrue(f.label, pages.all { it.height < 0.2 || it.height >= 0.9 })
+        }
+        val mini = NodeFact("player_page", "android.widget.FrameLayout", 0.0, 0.78, 1.0, 0.93, visible = true, selected = false)
+        val samples = ytm("ytmusic-samples-tab-1").snapshot()
+        assertNotNull("a mini player never hides a real Sample", rules.evaluate(samples.copy(nodes = samples.nodes + mini)))
+        assertNull(rules.evaluate(samples.copy(nodes = samples.nodes + mini.copy(top = 0.0, bottom = 1.0))))
+        assertNotNull("an invisible full player is no exclusion", rules.evaluate(samples.copy(nodes = samples.nodes + mini.copy(top = 0.0, bottom = 1.0, visible = false))))
+    }
+
+    @Test fun anyOfTheThreeSamplesIdsIsEnoughAndASmallOneIsNot() {
+        // reel_recycler is in every Samples capture, alone in the compressed album and artist ones (F16).
+        for (f in ytmFixtures.filter { it.expect == "block" }) assertTrue(f.label, f.snapshot().nodes.any { it.id == "reel_recycler" })
+        assertEquals(setOf("reel_recycler"), ytm("ytmusic-samples-album-2").snapshot().nodes.map { it.id }.toSet())
+        for (id in listOf("reel_recycler", "reel_watch_player", "reel_player_page_container")) {
+            val big = NodeFact(id, "android.view.ViewGroup", 0.0, 0.0, 1.0, 0.92, visible = true, selected = false)
+            assertNotNull(id, rules.evaluate(Snapshot(YTM, listOf(big))))
+            assertNull("$id under 0.6 high", rules.evaluate(Snapshot(YTM, listOf(big.copy(bottom = 0.59)))))
+            assertNull("$id invisible", rules.evaluate(Snapshot(YTM, listOf(big.copy(visible = false)))))
+        }
+        // Exact IDs only: YouTube's other reel_ IDs are not the feed.
+        assertNull(rules.evaluate(Snapshot(YTM, listOf(NodeFact("reel_time_bar", "c", 0.0, 0.0, 1.0, 1.0, true, false)))))
+    }
+
+    @Test fun youTubeMusicLeavesSamplesWithItsHomeTabFirst() {
+        val surface = rules.app(YTM)!!.surfaces.single()
+        assertEquals(LeaveOrder.OTHER_TAB_FIRST, surface.leave)
+        assertEquals(OtherTab("pivot_bar", TabPick.FIRST), surface.otherTab)
+        // The three apps before it leave as they did: Back first, YouTube and Instagram with "firstClickable".
+        assertEquals(TabPick.FIRST_CLICKABLE, rules.app(yt)!!.surfaces.single().otherTab!!.child)
+        assertEquals(TabPick.FIRST_CLICKABLE, rules.app(IG)!!.surfaces.single().otherTab!!.child)
+        for (pkg in listOf(yt, IG, X)) rules.app(pkg)!!.surfaces.forEach { assertEquals(pkg, LeaveOrder.BACK_FIRST, it.leave) }
+        // The tab bar is on every Samples capture, and its tabs sit within NodeFacts.TAB_DEPTH levels of
+        // it (one wrapper LinearLayout, none in the compressed dumps). Which one TabPick presses is pinned
+        // below over the same captures; what the press does waits for the phone (T1, T4).
+        for (f in ytmFixtures.filter { it.expect == "block" }) {
+            assertTrue(f.label, f.allNodes.any { it.id == "pivot_bar" })
+            val sizes = f.levelSizes("pivot_bar", NodeFacts.TAB_DEPTH)
+            assertTrue("${f.label}: tab row within TAB_DEPTH ($sizes)", sizes.any { it >= 3 })
+        }
+    }
+
+    @Test fun theLeaveKeyIsParsedStrictly() {
+        val ok = Repo.file("rules/screen-rules.json").readText()
+        val leave = "\"leave\": \"otherTabFirst\""
+        assertTrue(ok.contains(leave))
+        // "back" is the default, written or not.
+        assertEquals(LeaveOrder.BACK_FIRST, ScreenRules.parse(ok.replace(leave, "\"leave\": \"back\"")).app(YTM)!!.surfaces.single().leave)
+        val noKey = ok.replace(",\n          $leave", "")
+        assertTrue(noKey != ok)
+        assertEquals(LeaveOrder.BACK_FIRST, ScreenRules.parse(noKey).app(YTM)!!.surfaces.single().leave)
+        // An unknown order (names are exact) and the tab first without a tab are refused.
+        for (bad in listOf("\"leave\": \"home\"", "\"leave\": \"tabFirst\"", "\"leave\": \"\"", "\"leave\": \"Back\"")) {
+            assertThrows(bad, IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace(leave, bad)) }
+        }
+        val noTab = ok.replace("\"otherTab\": { \"parentId\": \"pivot_bar\", \"child\": \"first\" },\n          $leave", leave)
+        assertTrue(noTab != ok)
+        assertThrows(IllegalArgumentException::class.java) { ScreenRules.parse(noTab) }
+        // On X, which has no tab, the key is refused too.
+        assertThrows(IllegalArgumentException::class.java) {
+            ScreenRules.parse(ok.replace("{ \"tag\": { \"id\": \"PostDetail\" } }\n          ]", "{ \"tag\": { \"id\": \"PostDetail\" } }\n          ],\n          $leave"))
+        }
+    }
+
+    // WHICH TAB IS PRESSED (review of 31 October 2026, defect 1). YouTube Music makes its selected tab not
+    // clickable (all 45 raw dumps with a selected tab). With Home selected (Samples opened from an album
+    // or artist page reached from Home), "firstClickable" would press the Samples tab, so YouTube Music
+    // uses "first": Home, or no tab while Home is the selected one, and the ladder's step 1 is Back.
+
+    @Test fun theTabWayIsParsedStrictly() {
+        val ok = Repo.file("rules/screen-rules.json").readText()
+        val first = "\"child\": \"first\" }"
+        assertTrue(ok.contains(first))
+        assertEquals(TabPick.FIRST_CLICKABLE, ScreenRules.parse(ok.replace(first, "\"child\": \"firstClickable\" }")).app(YTM)!!.surfaces.single().otherTab!!.child)
+        for (bad in listOf("First", "firstclickable", "", "second", "last", "selected")) {
+            assertThrows(bad, IllegalArgumentException::class.java) { ScreenRules.parse(ok.replace(first, "\"child\": \"$bad\" }")) }
+        }
+        assertEquals(setOf("firstClickable", "first"), TabPick.WAYS)
+    }
+
+    @Test fun firstPressesTheFirstTabOnlyWhileItIsNotTheSelectedOne() {
+        // The tab row as uiautomator shows it: a wrapper, then four tabs; the selected tab is not clickable.
+        fun row(selected: Int?, compressed: Boolean = false): Tab {
+            val tabs = (0 until 4).map { i -> Tab("tab$i", clickable = i != selected, kids = listOf(Tab("label$i", clickable = false))) }
+            return if (compressed) Tab("pivot_bar", false, tabs) else Tab("pivot_bar", false, listOf(Tab("wrapper", false, tabs)))
+        }
+        for (compressed in listOf(false, true)) {
+            // Samples, Explore or Library selected, or none (right after a launch): both ways press Home.
+            for (sel in listOf(1, 2, 3, null)) {
+                assertEquals("$sel $compressed", "tab0", pick(row(sel, compressed), TabPick.FIRST)?.name)
+                assertEquals("$sel $compressed", "tab0", pick(row(sel, compressed), TabPick.FIRST_CLICKABLE)?.name)
+            }
+            // Home selected: "first" presses nothing; "firstClickable" would press the Samples tab (the defect).
+            assertNull(pick(row(0, compressed), TabPick.FIRST))
+            assertEquals("tab1", pick(row(0, compressed), TabPick.FIRST_CLICKABLE)?.name)
+        }
+        // An invisible first tab is never pressed, and the next one is not taken in its place.
+        val hidden = Tab("pivot_bar", false, listOf(Tab("tab0", true, visible = false), Tab("tab1", true)))
+        assertNull(pick(hidden, TabPick.FIRST))
+        assertEquals("tab1", pick(hidden, TabPick.FIRST_CLICKABLE)?.name)
+        // Nothing clickable within the depth: no press either way.
+        val deep = Tab("pivot_bar", false, listOf(Tab("a", false, listOf(Tab("b", false, listOf(Tab("tab0", true)))))))
+        assertNull(pick(deep, TabPick.FIRST))
+        assertNull(pick(deep, TabPick.FIRST_CLICKABLE))
+        assertNull(pick(Tab("pivot_bar", false), TabPick.FIRST))
+    }
+
+    @Test fun overTheYouTubeMusicCapturesFirstPressesHomeAndNeverTheSamplesTab() {
+        // The captures keep `selected`, and the raw dumps show clickable == not selected on the tab row,
+        // so each capture's tab row is modelled that way and run through the very TabPick the service runs.
+        var homeSelected = 0
+        for (f in ytmFixtures.filter { it.allNodes.any { n -> n.id == "pivot_bar" } }) {
+            val sel = f.selectedTabs("pivot_bar", NodeFacts.TAB_DEPTH)
+            val picked = f.pickTab("pivot_bar", TabPick.FIRST, NodeFacts.TAB_DEPTH)
+            if (sel == listOf(0)) {
+                homeSelected++
+                assertNull("${f.label}: Home is selected, so no tab is pressed (step 1 is Back)", picked)
+                assertEquals("${f.label}: firstClickable would press the Samples tab", 1, f.pickTab("pivot_bar", TabPick.FIRST_CLICKABLE, NodeFacts.TAB_DEPTH))
+            } else {
+                assertEquals("${f.label}: Home (selected $sel)", 0, picked)
+            }
+        }
+        assertEquals("home-after-samples-1 and home-miniplayer-1 have Home selected", 2, homeSelected)
+        // Every Samples capture: Home is pressed (Samples, Explore or Library was the selected tab).
+        for (f in ytmFixtures.filter { it.expect == "block" }) {
+            assertEquals(f.label, 0, f.pickTab("pivot_bar", TabPick.FIRST, NodeFacts.TAB_DEPTH))
+        }
+        // A Samples capture with Home selected instead (the case no capture covers): no tab, so Back.
+        val samples = ytm("ytmusic-samples-album-1")
+        assertNull(samples.pickTab("pivot_bar", TabPick.FIRST, NodeFacts.TAB_DEPTH, selectedOverride = 0))
+        assertEquals(1, samples.pickTab("pivot_bar", TabPick.FIRST_CLICKABLE, NodeFacts.TAB_DEPTH, selectedOverride = 0))
+    }
+
+    @Test fun aTabFirstRunWithHomeSelectedStartsWithBackAndShowsTheMessageOnce() {
+        // What FeedService does when TabPick finds no tab at step 1: otherTabUnavailable() gives Back,
+        // still the start of the run.
+        val ladder = LeaveLadder(now = { 0L })
+        assertEquals(LadderStep.Press(LeaveAction.OTHER_TAB, LeaveLadder.RECHECK_MS, startsRun = true), ladder.onFeedSeen(LeaveOrder.OTHER_TAB_FIRST))
+        assertEquals(LadderStep.Press(LeaveAction.BACK, LeaveLadder.RECHECK_MS, startsRun = true), ladder.otherTabUnavailable())
+    }
+
+    private fun pick(root: Tab, way: String): Tab? =
+        TabPick.pick(root, way, NodeFacts.TAB_DEPTH, { it.kids.size }, { n, i -> n.kids.getOrNull(i) }, { it.clickable }, { it.visible })
 }
+
+/** A tiny tree for the TabPick tests. */
+private class Tab(val name: String, val clickable: Boolean, val kids: List<Tab> = emptyList(), val visible: Boolean = true)
 
 /** A tiny tree for the TagWalk tests. */
 private class Fake(val name: String?, val kids: List<Fake> = emptyList()) {
@@ -416,3 +630,4 @@ private class Fake(val name: String?, val kids: List<Fake> = emptyList()) {
 
 private const val IG = "com.instagram.android"
 private const val X = "com.twitter.android"
+private const val YTM = "com.google.android.apps.youtube.music"

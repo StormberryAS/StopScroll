@@ -32,6 +32,7 @@
         <package android:name="com.google.android.youtube" />
         <package android:name="com.instagram.android" />
         <package android:name="com.twitter.android" />
+        <package android:name="com.google.android.apps.youtube.music" />
     </queries>
 
     <!-- NO BACKUP: allowBackup false, and both rule files exclude everything as well, because

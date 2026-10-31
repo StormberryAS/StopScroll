@@ -20,6 +20,14 @@ import org.json.JSONObject
  * facts from a view-ID lookup and a `tag` selector only facts from the walk, so a view and a tag of
  * the same name can never stand in for each other. A schema 1 reader refuses this file.
  *
+ * Schema 3 (0.0.4, YouTube Music): a surface may say how the ladder leaves it, `"leave"`: `"back"`
+ * (Back first, the order of every app before 0.0.4 and the default when the key is absent) or
+ * `"otherTabFirst"` (the rule's tab first; it needs `otherTab`). On YouTube Music's Samples tab Back
+ * closes the app and leaves the user's music paused, while the Home tab closes Samples inside the
+ * app (DESIGN 2.2 of 2026-10-31, YTM-LEAVE-1 a). Schema 3 also adds the tab way `"first"` beside
+ * `"firstClickable"` (TabPick.kt): YouTube Music's Home tab, and no tab while Home is the selected
+ * tab, so the press never lands on the Samples tab. A schema 2 reader refuses both.
+ *
  * Fail open: a screen no rule matches is allowed. A wrong block is worse than a missed feed.
  */
 
@@ -70,7 +78,10 @@ sealed interface Selector {
     ) : Selector
 }
 
-/** Where to find the tab pressed when Back does not leave the feed (spec 6.5, step 3). */
+/**
+ * Where to find the tab the ladder presses (spec 6.5): under the node with view ID [parentId], the
+ * node [child] names, "firstClickable" or "first" (schema 3; see TabPick.kt).
+ */
 data class OtherTab(val parentId: String, val child: String)
 
 data class Surface(
@@ -78,6 +89,8 @@ data class Surface(
     val match: Selector,
     val exclude: List<Selector>,
     val otherTab: OtherTab?,
+    /** How the ladder leaves this surface (schema 3); Back first unless the rule says otherwise. */
+    val leave: LeaveOrder = LeaveOrder.BACK_FIRST,
 )
 
 data class VerifiedOn(
@@ -96,6 +109,9 @@ data class AppRules(
     val surfaces: List<Surface>,
     val verifiedOn: List<VerifiedOn>,
 ) {
+    /** The surface a verdict named. */
+    fun surface(id: String): Surface = surfaces.first { it.id == id }
+
     /** Every view ID a rule of this app names: the only IDs the service ever looks up. */
     val referencedIds: Set<String> by lazy { collect { (it as? Selector.Node)?.id } }
 
@@ -146,7 +162,7 @@ data class ScreenRules(
     }
 
     companion object {
-        const val SCHEMA = 2
+        const val SCHEMA = 3
         private val ID = Regex("^[A-Za-z0-9_]{1,80}$")
         /** A Compose test tag: a letter first, then letters, digits, underscores or hyphens. */
         private val TAG = Regex("^[A-Za-z][A-Za-z0-9_-]{0,79}$")
@@ -214,15 +230,21 @@ data class ScreenRules(
         }
 
         private fun parseSurface(o: JSONObject): Surface {
-            keys(o, "surface", setOf("id", "match", "exclude", "otherTab"), required = setOf("id", "match", "exclude"))
+            keys(o, "surface", setOf("id", "match", "exclude", "otherTab", "leave"), required = setOf("id", "match", "exclude"))
             val ex = o.getJSONArray("exclude")
             val tab = o.optJSONObject("otherTab")?.let {
                 keys(it, "otherTab", setOf("parentId", "child"))
                 val child = it.getString("child")
-                require(child == "firstClickable") { "otherTab child '$child' is not supported" }
+                require(child in TabPick.WAYS) { "otherTab child '$child' is not supported" }
                 OtherTab(id(it.getString("parentId")), child)
             }
-            return Surface(o.getString("id"), parseSelector(o.getJSONObject("match")), (0 until ex.length()).map { parseSelector(ex.getJSONObject(it)) }, tab)
+            val leave = when (val l = if (o.has("leave")) o.getString("leave") else "back") {
+                "back" -> LeaveOrder.BACK_FIRST
+                "otherTabFirst" -> LeaveOrder.OTHER_TAB_FIRST
+                else -> throw IllegalArgumentException("leave '$l' is not supported")
+            }
+            require(leave != LeaveOrder.OTHER_TAB_FIRST || tab != null) { "leave otherTabFirst needs an otherTab" }
+            return Surface(o.getString("id"), parseSelector(o.getJSONObject("match")), (0 until ex.length()).map { parseSelector(ex.getJSONObject(it)) }, tab, leave)
         }
 
         private fun parseSelector(o: JSONObject): Selector {

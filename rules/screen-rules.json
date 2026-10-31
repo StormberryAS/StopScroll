@@ -1,6 +1,6 @@
 {
-  "schema": 2,
-  "rulesVersion": "2026-10-31.1",
+  "schema": 3,
+  "rulesVersion": "2026-10-31.2",
   "date": "2026-10-31",
   "apps": [
     {
@@ -95,6 +95,39 @@
           "appVersionCode": 312381001,
           "date": "2026-10-31",
           "how": "uiautomator dumps, sanitised into tests/fixtures/x/"
+        }
+      ]
+    },
+    {
+      "id": "ytmusic",
+      "package": "com.google.android.apps.youtube.music",
+      "name": "YouTube Music",
+      "feedName": "YouTube Music Samples",
+      "surfaces": [
+        {
+          "id": "samples",
+          "match": {
+            "any": [
+              { "node": { "id": "reel_recycler", "minHeight": 0.6 } },
+              { "node": { "id": "reel_watch_player", "minHeight": 0.6 } },
+              { "node": { "id": "reel_player_page_container", "minHeight": 0.6 } }
+            ]
+          },
+          "exclude": [
+            { "node": { "id": "player_page", "minHeight": 0.9 } }
+          ],
+          "otherTab": { "parentId": "pivot_bar", "child": "first" },
+          "leave": "otherTabFirst"
+        }
+      ],
+      "verifiedOn": [
+        {
+          "device": "Pixel, Android 17",
+          "android": "17",
+          "appVersionName": "9.43.51",
+          "appVersionCode": 94351240,
+          "date": "2026-10-31",
+          "how": "uiautomator dumps, sanitised into tests/fixtures/ytmusic/"
         }
       ]
     }

@@ -26,10 +26,12 @@ import android.view.accessibility.AccessibilityNodeInfo
  *      TagWalk.MAX_WALK_LEVELS levels or TagWalk.MAX_WALK_NODES nodes. Only a tag the rules name
  *      becomes a NodeFact (with tag = true, read like step 4); every other tag is dropped after its name
  *      is compared, and nothing else of it is read.
- * It also makes the one press inside another app the service may make: ACTION_CLICK on the first
- * visible, clickable node under the rule's otherTab parent, at most [TAB_DEPTH] levels down (spec
- * 6.5, step 3; in YouTube the tab Buttons sit one level under a wrapper, in Instagram the tab
- * FrameLayouts sit directly under tab_bar, feed_tab first). Nothing here is ever logged.
+ * It also makes the one press inside another app the service may make: ACTION_CLICK on the node
+ * TabPick chooses under the rule's otherTab parent, at most [TAB_DEPTH] levels down (spec 6.5, step
+ * 3; in YouTube and YouTube Music the tabs sit one level under a wrapper, Home first, in Instagram
+ * the tab FrameLayouts sit directly under tab_bar, feed_tab first). In YouTube Music the ladder
+ * presses it first, and only while Home is not the selected tab (0.0.4, TabPick "first"). Nothing
+ * here is ever logged.
  *
  * THE CACHE. Every lookup makes Android set "this service uses the Accessibility cache", and from
  * then on Android also sends this process screen-change events from EVERY app for that cache, until
@@ -93,25 +95,9 @@ object NodeFacts {
         val root = service.getRootInActiveWindow(0) ?: return false
         if (root.packageName?.toString() != pkg) return false
         val parent = root.findAccessibilityNodeInfosByViewId("$pkg:id/${tab.parentId}").firstOrNull() ?: return false
-        val target = firstClickable(parent, TAB_DEPTH) ?: return false
+        val target = TabPick.pick(parent, tab.child, TAB_DEPTH, { it.childCount }, { n, i -> n.getChild(i, 0) }, { it.isClickable }, { it.isVisibleToUser })
+            ?: return false
         return target.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-    }
-
-    /** The first visible, clickable node under [parent], breadth first, at most [depth] levels down. */
-    private fun firstClickable(parent: AccessibilityNodeInfo, depth: Int): AccessibilityNodeInfo? {
-        var level = listOf(parent)
-        repeat(depth) {
-            val next = ArrayList<AccessibilityNodeInfo>()
-            for (node in level) {
-                for (i in 0 until node.childCount) {
-                    val child = node.getChild(i, 0) ?: continue
-                    if (child.isClickable && child.isVisibleToUser) return child
-                    next += child
-                }
-            }
-            level = next
-        }
-        return null
     }
 
     /** How far under the otherTab parent the tab may sit. */

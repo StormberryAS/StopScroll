@@ -85,7 +85,7 @@ test('the Accessibility cache is kept off, so other apps\' events never reach th
   }
   // Every other function that fetches a node runs only through those two wrappers.
   const fetchers = [...nf.matchAll(/fun (\w+)\([^)]*\)[^{=]*[{=]/g)].map((m) => m[1]);
-  assert.deepEqual(fetchers.sort(), ['firstClickable', 'fact', 'look', 'lookOnce', 'pressOnce', 'pressOtherTab', 'tagFacts'].sort());
+  assert.deepEqual(fetchers.sort(), ['fact', 'look', 'lookOnce', 'pressOnce', 'pressOtherTab', 'tagFacts'].sort());
   // The tag walk (0.0.3) runs only from lookOnce, inside look's finally.
   assert.match(nf, /private fun lookOnce[\s\S]*?if \(app\.referencedTags\.isNotEmpty\(\)\) facts \+= tagFacts\(/);
   assert.equal([...nf.matchAll(/tagFacts\(/g)].length, 2, 'tagFacts is defined once and called once');
@@ -122,6 +122,25 @@ test('the tag walk is pure, capped at 14 levels and 64 nodes, and fetches withou
   assert.match(nf, /\.filter \{ \(_, tag\) -> tag in named \}/);
 });
 
+// Which tab is pressed (0.0.4, review of 31 October 2026): a pure function with two ways, run over the other
+// app's tree only from pressOnce, fetching each child with getChild(i, 0) and reading only clickable and visible.
+test('the tab pick is pure, has two ways, and reads only clickable and visible', () => {
+  const tp = kotlin.find((f) => f.path.endsWith('/TabPick.kt'))?.code ?? '';
+  assert.ok(tp.length > 0, 'TabPick.kt is there');
+  assert.doesNotMatch(tp, /^import /m, 'TabPick.kt imports nothing: no Android type');
+  assert.doesNotMatch(tp, /android\.|AccessibilityNodeInfo|getChild|performAction|viewIdResourceName|className/);
+  assert.match(tp, /const val FIRST_CLICKABLE = "firstClickable"\n/);
+  assert.match(tp, /const val FIRST = "first"\n/);
+  assert.match(tp, /val WAYS: Set<String> = setOf\(FIRST_CLICKABLE, FIRST\)\n/);
+  const nf = kotlin.find((f) => f.path.endsWith('NodeFacts.kt'))?.code ?? '';
+  const picks = [...nf.matchAll(/TabPick\.pick\(([^\n]*)\)\n/g)].map((m) => m[1]);
+  assert.deepEqual(picks, ['parent, tab.child, TAB_DEPTH, { it.childCount }, { n, i -> n.getChild(i, 0) }, { it.isClickable }, { it.isVisibleToUser }'], 'the one pick: child count, getChild(i, 0), clickable, visible');
+  assert.match(nf, /private fun pressOnce[\s\S]*?TabPick\.pick\(/);
+  assert.deepEqual(only(/TabPick\.pick\(/), ['NodeFacts.kt']);
+  const sr = kotlin.find((f) => f.path.endsWith('/ScreenRules.kt'))?.code ?? '';
+  assert.match(sr, /require\(child in TabPick\.WAYS\)/, 'the rules parser accepts only the two ways');
+});
+
 test('the service can press only Back, Home and the one tab click', () => {
   const globals = kotlin.flatMap((f) => [...f.code.matchAll(/performGlobalAction\(([^)]*)\)/g)].map((m) => `${f.path.split('/').pop()}:${m[1]}`));
   assert.deepEqual(globals.sort(), ['FeedService.kt:GLOBAL_ACTION_BACK', 'FeedService.kt:GLOBAL_ACTION_HOME']);
@@ -131,6 +150,21 @@ test('the service can press only Back, Home and the one tab click', () => {
   const otherGlobals = kotlin.flatMap((f) => [...f.code.matchAll(/GLOBAL_ACTION_[A-Z_]+/g)].map((m) => m[0])).filter((g) => g !== 'GLOBAL_ACTION_BACK' && g !== 'GLOBAL_ACTION_HOME');
   assert.deepEqual(otherGlobals, []);
   assert.deepEqual(only(/startActivity\(/), ['MainActivity.kt'], 'only the activity starts anything (settings and the fixed links)');
+});
+
+// The leave order (0.0.4): a second order of the same three actions, chosen by the surface's rule; the
+// run presses the tab of its own surface, and a missing tab at the start of a tab-first run is Back.
+test('the tab-first order uses the same three actions and the run\'s own surface', () => {
+  const ladder = kotlin.find((f) => f.path.endsWith('/LeaveLadder.kt'))?.code ?? '';
+  assert.match(ladder, /enum class LeaveAction \{ BACK, OTHER_TAB, HOME \}/);
+  assert.match(ladder, /enum class LeaveOrder \{ BACK_FIRST, OTHER_TAB_FIRST \}/);
+  assert.match(ladder, /const val RECHECK_MS = 700L\n/);
+  assert.match(ladder, /step == 1 && order == LeaveOrder\.OTHER_TAB_FIRST -> LadderStep\.Press\(LeaveAction\.BACK, RECHECK_MS, startsRun = true\)/);
+  const svc = kotlin.find((f) => f.path.endsWith('FeedService.kt'))?.code ?? '';
+  assert.match(svc, /ladder\.onFeedSeen\(surface\.leave\)/);
+  assert.match(svc, /val tab = surface\.otherTab\n/);
+  assert.doesNotMatch(svc, /surfaces\.firstNotNullOfOrNull/, 'never another surface\'s tab');
+  assert.match(read('android/app/src/main/kotlin/no/stormberry/stopscroll/NodeFacts.kt'), /const val TAB_DEPTH = 2\n/);
 });
 
 test('the package list is never rebuilt: no new AccessibilityServiceInfo, no empty or null list', () => {
@@ -157,16 +191,16 @@ test('the manifest asks for nothing; expected-permissions.txt holds the package 
   assert.doesNotMatch(m, /<permission\b(?![^>]*tools:node="remove")/);
 });
 
-test('the service configuration: YouTube, Instagram and X only, notificationTimeout 0, window content, not a tool', () => {
+test('the service configuration: YouTube, Instagram, X and YouTube Music only, notificationTimeout 0, window content, not a tool', () => {
   const x = read('android/app/src/main/res/xml/accessibility_service_config.xml').replace(/<!--[\s\S]*?-->/g, '');
-  assert.match(x, /android:packageNames="com\.google\.android\.youtube,com\.instagram\.android,com\.twitter\.android"/);
+  assert.match(x, /android:packageNames="com\.google\.android\.youtube,com\.instagram\.android,com\.twitter\.android,com\.google\.android\.apps\.youtube\.music"/);
   assert.match(x, /android:notificationTimeout="0"/);
   assert.match(x, /android:canRetrieveWindowContent="true"/);
   assert.match(x, /android:isAccessibilityTool="false"/);
   assert.match(x, /android:accessibilityFlags="flagReportViewIds"/);
   assert.doesNotMatch(x, /canPerformGestures|canTakeScreenshot|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews|flagRequestFilterKeyEvents/);
   const rules = JSON.parse(read('rules/screen-rules.json')) as { apps: { package: string }[] };
-  assert.deepEqual(rules.apps.map((a) => a.package), ['com.google.android.youtube', 'com.instagram.android', 'com.twitter.android'], 'the rules and the service list agree');
+  assert.deepEqual(rules.apps.map((a) => a.package), ['com.google.android.youtube', 'com.instagram.android', 'com.twitter.android', 'com.google.android.apps.youtube.music'], 'the rules and the service list agree');
 });
 
 // Per-app consent (UPG-2, 0.0.3): the service's plan and the bridge use the apps the consent covers,

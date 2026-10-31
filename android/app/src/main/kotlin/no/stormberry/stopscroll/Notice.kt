@@ -15,7 +15,7 @@ package no.stormberry.stopscroll
 
 /** The two messages, and how long each stays at least (about a short Toast, the pause one longer). */
 enum class NoticeKind(val baseMs: Long) {
-    /** "StopScroll closed %1$s", with the rules' feedName (YouTube Shorts, Instagram Reels, the X video feed). */
+    /** "StopScroll closed %1$s", with the rules' feedName (YouTube Shorts, Instagram Reels, the X video feed, YouTube Music Samples). */
     CLOSED(2_000L),
 
     /** "StopScroll paused for 30 seconds in %1$s ...", with the app name: it asks the user to act. */

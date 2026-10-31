@@ -112,7 +112,7 @@ export function pendingApps(state: State): AppInfo[] {
   return state.consentGiven ? state.apps.filter((a) => !a.agreed) : [];
 }
 
-/** "X", "X and Facebook", "X, Facebook and Snapchat". */
+/** "YouTube Music", "X and YouTube Music", "X, Facebook and Snapchat". */
 export function andList(names: readonly string[]): string {
   if (names.length === 0) throw new Error('no app named');
   if (names.length === 1) return names[0] as string;
@@ -152,17 +152,18 @@ export interface AppRow {
  * and nothing else: none of them is in the service's packageNames, the <queries> block or the
  * disclosure, so StopScroll receives nothing from them (tests/release.test.ts pins that). A release
  * that adds one moves it into rules/screen-rules.json, and the row becomes a real one: 0.0.2 did
- * that for Instagram (Marcos, 2026-10-30), 0.0.3 for X (Marcos, 2026-10-31).
+ * that for Instagram (Marcos, 2026-10-30), 0.0.3 for X (Marcos, 2026-10-31). 0.0.4 added YouTube
+ * Music (not on this list before) and left out the third app of Marcos's 0.0.1 list (LINKEDIN-1,
+ * 2026-10-31): the list is Facebook and Snapchat.
  */
 export const COMING_SOON: readonly { readonly key: string; readonly name: string }[] = [
   { key: 'facebook', name: 'Facebook' },
   { key: 'snapchat', name: 'Snapchat' },
-  { key: 'linkedin', name: 'LinkedIn' },
 ];
 
 /**
- * The apps the settings list shows: every app the rules cover (YouTube, Instagram and X since
- * 0.0.3), then the coming-soon apps the rules do not cover yet, disabled. A watched app the user has
+ * The apps the settings list shows: every app the rules cover (YouTube, Instagram, X and YouTube
+ * Music since 0.0.4), then the coming-soon apps the rules do not cover yet, disabled. A watched app the user has
  * not agreed to (while others are) shows the waiting note and no mode buttons.
  */
 export function appRows(state: State): AppRow[] {
@@ -182,7 +183,7 @@ export function appRows(state: State): AppRow[] {
   return rows;
 }
 
-/** "the YouTube app", "the YouTube or Instagram app", "the YouTube, Instagram or X app". */
+/** "the YouTube app", "the YouTube or Instagram app", "the YouTube, Instagram, X or YouTube Music app". */
 export function appList(names: readonly string[]): string {
   if (names.length === 0) throw new Error('no app named');
   if (names.length === 1) return `the ${names[0]} app`;

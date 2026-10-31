@@ -20,8 +20,9 @@ import android.view.accessibility.AccessibilityEvent
  *   - on a window or content change from a watched app, checks the screen through NodeFacts (the
  *     window check first, then only the IDs the rules name, and in X the short tag walk) and the
  *     rules (ScreenRules);
- *   - when the feed is open, runs the leave ladder (LeaveLadder): Back, Back, the tab or Home, Home
- *     (X's viewer has no tab bar, so there it is Back, Back, Home);
+ *   - when the feed is open, runs the leave ladder (LeaveLadder) in the order the surface's rule
+ *     names: Back, Back, the tab or Home, Home (X's viewer has no tab bar, so there it is Back,
+ *     Back, Home); in YouTube Music's Samples the tab first: the tab, Back, the tab, Home (0.0.4);
  *   - shows a short on-screen message saying why the screen changed (Notice.kt, NoticeWindow: its own
  *     Accessibility overlay window, because Android drops a Toast from an app without notifications,
  *     decision D2), and counts what it did (Settings).
@@ -116,10 +117,12 @@ class FeedService : AccessibilityService() {
         val verdict = rules.evaluate(snapshot) ?: return
         val pkg = verdict.app.packageName
         val ladder = ladders.getOrPut(pkg) { LeaveLadder(SystemClock::elapsedRealtime) }
-        perform(verdict.app, ladder, ladder.onFeedSeen())
+        // The run keeps its own surface: its leave order and its tab.
+        val surface = verdict.app.surface(verdict.surfaceId)
+        perform(verdict.app, surface, ladder, ladder.onFeedSeen(surface.leave))
     }
 
-    private fun perform(app: AppRules, ladder: LeaveLadder, step: LadderStep) {
+    private fun perform(app: AppRules, surface: Surface, ladder: LeaveLadder, step: LadderStep) {
         when (step) {
             LadderStep.Nothing -> Unit
             is LadderStep.Press -> {
@@ -127,15 +130,16 @@ class FeedService : AccessibilityService() {
                     LeaveAction.BACK -> performGlobalAction(GLOBAL_ACTION_BACK)
                     LeaveAction.HOME -> performGlobalAction(GLOBAL_ACTION_HOME)
                     LeaveAction.OTHER_TAB -> {
-                        val tab = app.surfaces.firstNotNullOfOrNull { it.otherTab }
+                        val tab = surface.otherTab
                         tab != null && NodeFacts.pressOtherTab(this, app.packageName, tab)
                     }
                 }
                 if (!pressed && step.action == LeaveAction.OTHER_TAB) {
-                    perform(app, ladder, ladder.otherTabUnavailable())
+                    // Step 3: Home instead; step 1 of a tab-first run: Back instead, which shows the message.
+                    perform(app, surface, ladder, ladder.otherTabUnavailable())
                     return
                 }
-                scheduleRecheck(app, ladder, step.recheckInMs)
+                scheduleRecheck(app, surface, ladder, step.recheckInMs)
             }
             LadderStep.Closed -> SettingsStore.update(this) { it.withClosed(app.packageName, Today.iso()) }
             is LadderStep.Failed -> if (step.paused) SettingsStore.update(this) { it.withLoopPause(app.packageName) }
@@ -144,7 +148,7 @@ class FeedService : AccessibilityService() {
         Notices.forStep(app, step)?.let(notice::show)
     }
 
-    private fun scheduleRecheck(app: AppRules, ladder: LeaveLadder, delayMs: Long) {
+    private fun scheduleRecheck(app: AppRules, surface: Surface, ladder: LeaveLadder, delayMs: Long) {
         pendingRecheck?.let { main.removeCallbacks(it) }
         val r = Runnable {
             pendingRecheck = null
@@ -156,8 +160,7 @@ class FeedService : AccessibilityService() {
             val look = NodeFacts.look(this) { pkg -> if (pkg == app.packageName && ServiceConfig.mayRead(p, pkg)) app else null }
             // Another app in front (the launcher after Home, say) means the feed has gone.
             val still = (look as? NodeFacts.Look.Read)?.snapshot?.let { rules.evaluate(it) } != null
-            val hasTab = app.surfaces.any { it.otherTab != null }
-            perform(app, ladder, ladder.onRecheck(still, hasTab))
+            perform(app, surface, ladder, ladder.onRecheck(still, surface.otherTab != null))
         }
         pendingRecheck = r
         main.postDelayed(r, delayMs)
