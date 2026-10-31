@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- StopScroll test fixture. SANITISED by tools/scrub-fixture.ts: every text, content-desc and hint
+     was removed, with every attribute except class, resource-id, bounds and selected. The tree
+     structure is kept as captured. The raw capture holds personal on-screen text and never enters
+     this repository. -->
+<fixture app="com.twitter.android" label="x-gallery-image-1" expect="allow" captured="2026-10-31" device="Pixel, Android 17" android="17" source="uiautomator">
+  <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+    <node class="android.widget.LinearLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+      <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+        <node class="android.widget.LinearLayout" resource-id="com.twitter.android:id/action_bar_root" bounds="[0,0][1080,2410]" selected="false">
+          <node class="android.widget.FrameLayout" resource-id="android:id/content" bounds="[0,0][1080,2410]" selected="false">
+            <node class="androidx.compose.ui.platform.ComposeView" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+              <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                  <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                    <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                      <node class="android.view.View" resource-id="MediaGallery" bounds="[0,0][1080,2410]" selected="false">
+                        <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                          <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false" />
+                          </node>
+                        </node>
+                        <node class="android.view.View" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+                          <node class="android.view.View" resource-id="" bounds="[0,1205][1080,2410]" selected="false" />
+                          <node class="android.widget.ImageView" resource-id="" bounds="[43,194][169,320]" selected="false" />
+                          <node class="android.widget.ImageView" resource-id="" bounds="[912,194][1038,320]" selected="false" />
+                          <node class="android.view.View" resource-id="" bounds="[503,1659][577,1696]" selected="false" />
+                          <node class="android.view.View" resource-id="" bounds="[42,1723][1038,1849]" selected="false">
+                            <node class="android.widget.ImageView" resource-id="" bounds="[32,1723][158,1849]" selected="false" />
+                            <node class="android.view.View" resource-id="" bounds="[184,1723][799,1849]" selected="false">
+                              <node class="android.widget.TextView" resource-id="" bounds="[184,1739][471,1789]" selected="false" />
+                              <node class="android.view.View" resource-id="" bounds="[476,1743][518,1785]" selected="false" />
+                              <node class="android.widget.TextView" resource-id="" bounds="[184,1789][451,1833]" selected="false" />
+                            </node>
+                            <node class="android.view.View" resource-id="" bounds="[831,1723][1038,1849]" selected="false">
+                              <node class="android.widget.TextView" resource-id="" bounds="[873,1763][996,1809]" selected="false" />
+                              <node class="android.widget.Button" resource-id="" bounds="[831,1742][1038,1830]" selected="false" />
+                            </node>
+                          </node>
+                          <node class="android.widget.TextView" resource-id="" bounds="[42,1875][1038,1983]" selected="false" />
+                          <node class="android.view.View" resource-id="" bounds="[42,2007][279,2133]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[63,2007][258,2133]" selected="false">
+                              <node class="android.view.View" resource-id="" bounds="[94,2041][152,2099]" selected="false" />
+                              <node class="android.view.View" resource-id="" bounds="[135,2007][261,2133]" selected="false">
+                                <node class="android.widget.TextView" resource-id="" bounds="[168,2047][227,2093]" selected="false" />
+                              </node>
+                            </node>
+                          </node>
+                          <node class="android.view.View" resource-id="" bounds="[300,2007][537,2133]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[321,2007][516,2133]" selected="false">
+                              <node class="android.view.View" resource-id="" bounds="[343,2041][401,2099]" selected="false" />
+                              <node class="android.view.View" resource-id="" bounds="[393,2007][519,2133]" selected="false">
+                                <node class="android.widget.TextView" resource-id="" bounds="[417,2047][495,2093]" selected="false" />
+                              </node>
+                            </node>
+                          </node>
+                          <node class="android.view.View" resource-id="" bounds="[558,2007][795,2133]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[579,2007][774,2133]" selected="false">
+                              <node class="android.view.View" resource-id="" bounds="[577,2007][703,2133]" selected="false">
+                                <node class="android.view.View" resource-id="" bounds="[611,2041][669,2099]" selected="false" />
+                              </node>
+                              <node class="android.view.View" resource-id="" bounds="[651,2007][777,2133]" selected="false">
+                                <node class="android.widget.TextView" resource-id="" bounds="[685,2047][743,2093]" selected="false" />
+                              </node>
+                            </node>
+                          </node>
+                          <node class="android.view.View" resource-id="" bounds="[803,2007][924,2133]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[803,2007][924,2133]" selected="false">
+                              <node class="android.view.View" resource-id="" bounds="[837,2041][895,2099]" selected="false" />
+                            </node>
+                          </node>
+                          <node class="android.view.View" resource-id="" bounds="[924,2007][1050,2133]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[924,2007][1050,2133]" selected="false">
+                              <node class="android.view.View" resource-id="" bounds="[958,2041][1016,2099]" selected="false" />
+                            </node>
+                          </node>
+                          <node class="android.view.View" resource-id="" bounds="[0,2157][1080,2410]" selected="false">
+                            <node class="android.view.View" resource-id="" bounds="[21,2178][1059,2326]" selected="false">
+                              <node class="android.view.View" resource-id="" bounds="[21,2178][1059,2326]" selected="false">
+                                <node class="android.view.View" resource-id="" bounds="[21,2189][147,2315]" selected="false" />
+                                <node class="android.widget.EditText" resource-id="post-detail-reply-text-field" bounds="[147,2189][660,2315]" selected="false">
+                                  <node class="android.widget.TextView" resource-id="" bounds="[147,2227][433,2277]" selected="false" />
+                                  <node class="android.view.View" resource-id="" bounds="[147,2227][457,2277]" selected="false" />
+                                </node>
+                                <node class="android.view.View" resource-id="" bounds="[660,2189][786,2315]" selected="false">
+                                  <node class="android.view.View" resource-id="" bounds="[661,2190][787,2316]" selected="false">
+                                    <node class="android.view.View" resource-id="" bounds="[692,2221][755,2284]" selected="false" />
+                                    <node class="android.widget.Button" resource-id="" bounds="[671,2200][776,2305]" selected="false" />
+                                  </node>
+                                </node>
+                                <node class="android.view.View" resource-id="" bounds="[786,2189][912,2315]" selected="false">
+                                  <node class="android.view.View" resource-id="" bounds="[787,2190][913,2316]" selected="false">
+                                    <node class="android.view.View" resource-id="" bounds="[818,2221][881,2284]" selected="false" />
+                                    <node class="android.widget.Button" resource-id="" bounds="[797,2200][902,2305]" selected="false" />
+                                  </node>
+                                </node>
+                                <node class="android.view.View" resource-id="" bounds="[913,2190][1039,2316]" selected="false">
+                                  <node class="android.view.View" resource-id="" bounds="[944,2221][1007,2284]" selected="false" />
+                                  <node class="android.widget.Button" resource-id="" bounds="[923,2200][1028,2305]" selected="false" />
+                                </node>
+                              </node>
+                            </node>
+                          </node>
+                        </node>
+                      </node>
+                    </node>
+                    <node class="android.view.View" resource-id="" bounds="[477,135][603,261]" selected="false" />
+                  </node>
+                </node>
+              </node>
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</fixture>

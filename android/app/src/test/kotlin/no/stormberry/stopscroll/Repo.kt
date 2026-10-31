@@ -23,8 +23,8 @@ class Fixture(val rel: String) {
     val label: String = doc.getAttribute("label")
     val expect: String = doc.getAttribute("expect")
 
-    /** Every node, as NodeFact, the screen being the root node's bounds. IDs of other namespaces become "". */
-    val allNodes: List<NodeFact> by lazy {
+    /** Every node element, in document order (the first is the window's root). */
+    private val elements: List<Element> by lazy {
         val nodes = mutableListOf<Element>()
         fun walk(e: Element) {
             if (e.tagName == "node") nodes += e
@@ -33,14 +33,19 @@ class Fixture(val rel: String) {
         }
         walk(doc)
         require(nodes.isNotEmpty()) { "$rel has no node" }
-        val screen = bounds(nodes.first())
+        nodes
+    }
+
+    private val facts: Map<Element, NodeFact> by lazy {
+        val screen = bounds(elements.first())
         val w = (screen[2] - screen[0]).toDouble()
         val h = (screen[3] - screen[1]).toDouble()
-        nodes.map { n ->
+        elements.associateWith { n ->
             val b = bounds(n)
             val rid = n.getAttribute("resource-id")
+            val tag = TagWalk.isBareTag(rid)
             NodeFact(
-                id = if (rid.startsWith("$app:id/")) rid.removePrefix("$app:id/") else "",
+                id = if (rid.startsWith("$app:id/")) rid.removePrefix("$app:id/") else if (tag) rid else "",
                 className = n.getAttribute("class"),
                 left = (b[0] - screen[0]) / w,
                 top = (b[1] - screen[1]) / h,
@@ -48,9 +53,26 @@ class Fixture(val rel: String) {
                 bottom = (b[3] - screen[1]) / h,
                 visible = true,
                 selected = n.getAttribute("selected") == "true",
+                tag = tag,
             )
         }
     }
+
+    /**
+     * Every node, as NodeFact, the screen being the root node's bounds. IDs of other namespaces
+     * become ""; a bare screen tag (X) is kept as the ID with tag = true.
+     */
+    val allNodes: List<NodeFact> by lazy { elements.map { facts.getValue(it) } }
+
+    private fun children(e: Element): List<Element> =
+        (0 until e.childNodes.length).mapNotNull { e.childNodes.item(it) as? Element }.filter { it.tagName == "node" }
+
+    /**
+     * The very walk the service runs (TagWalk), over this capture's tree: the name of a node is its
+     * resource-id as uiautomator wrote it ("com.twitter.android:id/action_bar_root", "VideoTab", "").
+     */
+    fun walk(): TagWalk.Found<Element> =
+        TagWalk.walk(elements.first(), { children(it).size }, { e, i -> children(e).getOrNull(i) }, { it.getAttribute("resource-id") })
 
     /** The resource IDs (without the package) of the direct children of the first node with [id], in order. */
     fun childIds(id: String): List<String> {
@@ -85,10 +107,17 @@ class Fixture(val rel: String) {
         return null
     }
 
-    /** What NodeFacts.look would return: only the nodes whose IDs the app's rules name. */
+    /**
+     * What NodeFacts.look would return: the view-ID lookups (only the IDs the app's rules name), then,
+     * when the rules name a tag, the walk's tags that the rules name, as tag facts.
+     */
     fun snapshot(rules: ScreenRules = Repo.rules): Snapshot {
-        val ids = rules.app(app)?.referencedIds.orEmpty()
-        return Snapshot(app, allNodes.filter { it.id in ids })
+        val appRules = rules.app(app)
+        val ids = appRules?.referencedIds.orEmpty()
+        val tags = appRules?.referencedTags.orEmpty()
+        val byId = allNodes.filter { !it.tag && it.id in ids }
+        val byTag = if (tags.isEmpty()) emptyList() else walk().tagged.filter { (_, t) -> t in tags }.map { (e, _) -> facts.getValue(e) }
+        return Snapshot(app, byId + byTag)
     }
 
     private fun bounds(e: Element): IntArray {

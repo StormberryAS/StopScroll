@@ -7,22 +7,23 @@ export const text = {
     statusOn: 'StopScroll is on.',
     introTitle: 'What StopScroll does',
     introBody: [
-        'StopScroll closes the endless short-video feeds in the YouTube and Instagram apps and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.',
+        'StopScroll closes the endless short-video feeds in the YouTube, Instagram and X apps and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.',
+        'In X, the feed is the full-screen video viewer, where you swipe up for the next video. X opens it when you tap a video in the timeline, a post, search or a profile, so StopScroll closes it there too. Videos still play in the timeline, in posts and in search.',
         'No ads, no account, no server calls. StopScroll has no internet permission at all, so it never contacts a server, ours or anyone else’s.',
         'StopScroll is not an accessibility tool and not parental control: you can turn it off at any time.',
     ],
-    introNext: 'Coming soon: Facebook, Snapchat, LinkedIn and X. StopScroll does not watch them yet.',
+    introNext: 'Coming soon: Facebook, Snapchat and LinkedIn. StopScroll does not watch them yet.',
     turnOnButton: 'Turn on blocking',
     disclosureTitle: 'StopScroll needs Accessibility access',
     disclosure: (apps) => [
         { lead: null, body: 'To find the short-video feeds, StopScroll uses Android’s Accessibility Service.' },
         {
             lead: 'What it looks at.',
-            body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether a Shorts or Reels player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
+            body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether a short-video feed is open: the Shorts or Reels player, or X’s full-screen video viewer. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
         },
         {
             lead: 'What it does.',
-            body: 'When a feed you chose to block opens, StopScroll presses Back for you, twice if needed. If that does not leave the feed, it presses one tab in the same app, then Home. It presses nothing else.',
+            body: 'When a feed you chose to block opens, StopScroll presses Back for you, twice if needed. If that does not leave the feed, it presses one tab in the same app where there is one, then Home. It presses nothing else.',
         },
         {
             lead: 'What it keeps.',
@@ -34,7 +35,7 @@ export const text = {
         },
         {
             lead: null,
-            body: 'Android will remind you later that StopScroll can see your screen. That is expected. You can turn StopScroll off at any time in this app or in Android’s settings.',
+            body: 'Android will remind you later that StopScroll can see your screen. That is expected. If a later version adds an app, StopScroll does not watch it until you agree again. You can turn StopScroll off at any time in this app or in Android’s settings.',
         },
     ],
     agree: 'I agree',
@@ -69,7 +70,7 @@ export const text = {
     turnOffBody: 'StopScroll switches itself off in Android’s settings. You can turn it on again there at any time.',
     turnOff: 'Turn StopScroll off',
     teachTitle: 'Before you turn on Accessibility for any app',
-    teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: two apps; only Back, Home and one tab; no internet; its code is open source (MIT).',
+    teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: three apps; only Back, Home and one tab; no internet; its code is open source (MIT).',
     privacyTitle: 'Privacy',
     privacyBody: [
         'StopScroll has no internet permission, so it cannot send anything anywhere itself. It shows no ads and has no account.',
@@ -78,10 +79,14 @@ export const text = {
     ],
     privacyMore: 'More about privacy',
     footerCredits: 'Runs entirely on your device: our own code and the open-source parts listed in NOTICE. Nothing is sent.',
-    footerPermissions: 'Accessibility only, watching two apps. No internet. No ads. No tracking.',
+    footerPermissions: 'Accessibility only, watching three apps. No internet. No ads. No tracking.',
     footerOffline: 'Your settings and feed counts stay on this phone, nowhere else. Disconnect and try it.',
     webTitle: 'This is the StopScroll app’s settings screen',
     webBody: 'StopScroll is an Android app. Its settings screen works only inside the app.',
+    pendingTitle: (names) => `StopScroll now works with ${names} too.`,
+    pendingBody: (names) => `StopScroll does not watch ${names} until you read the updated disclosure and agree. The apps you agreed to before keep working as they are.`,
+    pendingButton: 'Read and agree',
+    appWaiting: (name) => `Waiting for your agreement: StopScroll does not watch ${name} yet.`,
     errorNoConsent: 'Please read and agree to the disclosure first.',
     errorGeneric: 'That did not work. Please try again.',
 };

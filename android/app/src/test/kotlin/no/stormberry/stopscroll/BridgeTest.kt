@@ -8,7 +8,8 @@ import org.junit.Test
 /** Every page message is checked before the app acts; links are IDs, never addresses. */
 class BridgeTest {
     private val yt = "com.google.android.youtube"
-    private fun parse(s: String) = Bridge.parse(s, listOf(yt))
+    private val x = "com.twitter.android"
+    private fun parse(s: String) = Bridge.parse(s, listOf(yt), listOf(yt))
 
     @Test fun wellFormedMessages() {
         assertEquals(Command.GetState(3), parse("""{"v":1,"type":"getState","id":3}"""))
@@ -31,6 +32,21 @@ class BridgeTest {
         assertNull(parse("""{"v":1,"type":"openLink","id":1,"link":"mailto:someone@example.com"}"""))
     }
 
+    /** Per-app consent (0.0.3): an app the user has not agreed to has no mode to set. */
+    @Test fun setModeIsRefusedForAnAppNotAgreedTo() {
+        val watched = listOf(yt, "com.instagram.android", x)
+        val agreed = listOf(yt, "com.instagram.android")
+        assertNull(Bridge.parse("""{"v":1,"type":"setMode","id":1,"app":"$x","mode":"off"}""", watched, agreed))
+        assertNull(Bridge.parse("""{"v":1,"type":"setMode","id":1,"app":"$x","mode":"always"}""", watched, agreed))
+        assertEquals(Command.SetMode(2, yt, Mode.OFF), Bridge.parse("""{"v":1,"type":"setMode","id":2,"app":"$yt","mode":"off"}""", watched, agreed))
+        assertEquals(Command.SetMode(3, x, Mode.ALWAYS), Bridge.parse("""{"v":1,"type":"setMode","id":3,"app":"$x","mode":"always"}""", watched, watched))
+        // Before any agreement nothing can be set, and an agreed package outside the rules is still refused.
+        assertNull(Bridge.parse("""{"v":1,"type":"setMode","id":1,"app":"$yt","mode":"off"}""", watched, emptyList()))
+        assertNull(Bridge.parse("""{"v":1,"type":"setMode","id":1,"app":"com.example.bank","mode":"off"}""", watched, listOf("com.example.bank")))
+        // The other commands do not depend on the agreed list (openAccessibilitySettings is checked in MainActivity).
+        assertEquals(Command.OpenAccessibilitySettings(4), Bridge.parse("""{"v":1,"type":"openAccessibilitySettings","id":4}""", watched, emptyList()))
+    }
+
     @Test fun theLinkListIsFixedAndTheEmailCarriesVersionsOnly() {
         assertEquals(setOf("stormberry", "brreg", "linkedin", "github", "nostr", "onion", "contact", "email"), LinkList.IDS)
         assertEquals("contact", LinkList.idFor("mailto:info@stormberry.as"))
@@ -41,20 +57,22 @@ class BridgeTest {
 
     /** The report email (Marcos, 2026-10-29): exactly these lines, versions and the package name only. */
     @Test fun theReportEmailIsExactlyTheApprovedOne() {
-        val mail = LinkList.email("0.0.2", 1002, "no.stormberry.stopscroll.play", "17", listOf("YouTube" to "21.42.36", "Instagram" to "453.0.0.57.79"))
+        val mail = LinkList.email("0.0.3", 1003, "no.stormberry.stopscroll.play", "17", listOf("YouTube" to "21.42.36", "Instagram" to "453.0.0.57.79", "X" to "12.38.1-prod.01"))
         val (to, query) = mail.removePrefix("mailto:").split("?", limit = 2)
         assertEquals("info@stormberry.as", to)
         val params = query.split("&").associate { val (k, v) = it.split("=", limit = 2); k to java.net.URLDecoder.decode(v, "UTF-8") }
         assertEquals(setOf("subject", "body"), params.keys)
-        assertEquals("StopScroll 0.0.2: missed a feed or blocked a normal video", params["subject"])
+        assertEquals("StopScroll 0.0.3: missed a feed or blocked a normal video", params["subject"])
         assertEquals(
-            "Which app:\nWhat happened:\n\nStopScroll 0.0.2 (1002)\nno.stormberry.stopscroll.play\nAndroid 17\nYouTube 21.42.36\nInstagram 453.0.0.57.79",
+            "Which app:\nWhat happened:\n\nStopScroll 0.0.3 (1003)\nno.stormberry.stopscroll.play\nAndroid 17\nYouTube 21.42.36\nInstagram 453.0.0.57.79\nX 12.38.1-prod.01",
             params["body"],
         )
         // Spaces are %20, never "+", so every mail app shows them as spaces.
         assertEquals(false, mail.contains("+"))
-        val none = LinkList.email("0.0.2", 2, "no.stormberry.stopscroll", "16", listOf("YouTube" to null, "Instagram" to null))
-        assertEquals(true, java.net.URLDecoder.decode(none, "UTF-8").endsWith("\nno.stormberry.stopscroll\nAndroid 16\nYouTube not installed\nInstagram not installed"))
+        val none = LinkList.email("0.0.3", 3, "no.stormberry.stopscroll", "16", listOf("YouTube" to null, "Instagram" to null, "X" to null))
+        assertEquals(true, java.net.URLDecoder.decode(none, "UTF-8").endsWith("\nno.stormberry.stopscroll\nAndroid 16\nYouTube not installed\nInstagram not installed\nX not installed"))
+        // The rules' app names, in the rules' order, are the lines MainActivity passes.
+        assertEquals(listOf("YouTube", "Instagram", "X"), Repo.rules.apps.map { it.name })
     }
 
     @Test fun navigationLetsOnlyTheAppsOwnPagesAndTheFixedLinksThrough() {
@@ -68,9 +86,12 @@ class BridgeTest {
 
     @Test fun theStateMessageCarriesNoScreenContent() {
         val s = AppState(
-            consent = ConsentRecord("2026-10-29", 1, listOf(yt)), consentValid = true, serviceEnabled = true, serviceRunning = true,
-            sdk = 36, installedFromFile = false, returnedFromSettings = false, appVersion = "0.0.1", rulesVersion = "r", disclosureVersion = 1,
-            apps = listOf(AppRow("youtube", yt, "YouTube", "YouTube Shorts", Mode.ALWAYS, true, "21.42", AppStats(2, 0, "2026-10-29"))),
+            consent = ConsentRecord("2026-10-30", 2, listOf(yt)), anyAgreed = true, serviceEnabled = true, serviceRunning = true,
+            sdk = 36, installedFromFile = false, returnedFromSettings = false, appVersion = "0.0.3", rulesVersion = "r", disclosureVersion = 2,
+            apps = listOf(
+                AppRow("youtube", yt, "YouTube", "YouTube Shorts", Mode.ALWAYS, agreed = true, installed = true, versionName = "21.42", stats = AppStats(2, 0, "2026-10-29")),
+                AppRow("x", x, "X", "the X video feed", Mode.ALWAYS, agreed = false, installed = true, versionName = "12.38.1", stats = AppStats()),
+            ),
         )
         val o = JSONObject(Bridge.state(s, 9))
         assertEquals("state", o.getString("type"))
@@ -81,8 +102,16 @@ class BridgeTest {
             st.keys().asSequence().toSet(),
         )
         assertEquals(
-            setOf("id", "package", "name", "feedName", "mode", "installed", "versionName", "closed", "loopPauses", "lastClosed"),
+            setOf("id", "package", "name", "feedName", "mode", "agreed", "installed", "versionName", "closed", "loopPauses", "lastClosed"),
             st.getJSONArray("apps").getJSONObject(0).keys().asSequence().toSet(),
         )
+        assertEquals(true, st.getBoolean("consentGiven"))
+        assertEquals("2026-10-30", st.getString("consentDate"))
+        assertEquals(true, st.getJSONArray("apps").getJSONObject(0).getBoolean("agreed"))
+        assertEquals(false, st.getJSONArray("apps").getJSONObject(1).getBoolean("agreed"))
+        // No app agreed: no consent, no date shown.
+        val none = JSONObject(Bridge.state(s.copy(anyAgreed = false), null)).getJSONObject("state")
+        assertEquals(false, none.getBoolean("consentGiven"))
+        assertEquals(true, none.isNull("consentDate"))
     }
 }

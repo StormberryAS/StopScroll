@@ -13,6 +13,8 @@ export interface AppInfo {
   readonly name: string;
   readonly feedName: string;
   readonly mode: Mode;
+  /** The stored consent covers this app (per-app consent, 0.0.3). An app not agreed to has no mode to set. */
+  readonly agreed: boolean;
   readonly installed: boolean;
   readonly versionName: string | null;
   readonly closed: number;
@@ -22,6 +24,7 @@ export interface AppInfo {
 
 /** What the Android app reports. Absent on the website. */
 export interface State {
+  /** At least one app is agreed to. */
   readonly consentGiven: boolean;
   readonly consentDate: string | null;
   readonly serviceEnabled: boolean;
@@ -37,7 +40,7 @@ export interface State {
 
 /** What the page itself remembers between draws (never stored: the app keeps the settings). */
 export interface UiMemory {
-  /** The user asked to turn blocking on and has not answered the disclosure yet. */
+  /** The user asked to turn blocking on, or to read and agree for an added app, and has not answered the disclosure yet. */
   readonly disclosureOpen: boolean;
 }
 
@@ -53,12 +56,12 @@ const dayOrNull = (x: unknown): x is string | null => x === null || (isStr(x) &&
 
 function parseApp(x: unknown): AppInfo | null {
   if (!isObj(x)) return null;
-  const { id, name, feedName, mode, installed, versionName, closed, loopPauses, lastClosed } = x;
+  const { id, name, feedName, mode, agreed, installed, versionName, closed, loopPauses, lastClosed } = x;
   const pkg = x['package'];
   if (!isStr(id) || !isStr(pkg) || !isStr(name) || !isStr(feedName)) return null;
   if (mode !== 'off' && mode !== 'always') return null;
-  if (!isBool(installed) || !strOrNull(versionName) || !isInt(closed) || !isInt(loopPauses) || !dayOrNull(lastClosed)) return null;
-  return { id, package: pkg, name, feedName, mode, installed, versionName, closed, loopPauses, lastClosed };
+  if (!isBool(agreed) || !isBool(installed) || !strOrNull(versionName) || !isInt(closed) || !isInt(loopPauses) || !dayOrNull(lastClosed)) return null;
+  return { id, package: pkg, name, feedName, mode, agreed, installed, versionName, closed, loopPauses, lastClosed };
 }
 
 /** Checks a state message from the app field by field; anything unexpected gives null. */
@@ -90,11 +93,38 @@ export function parseState(x: unknown): State | null {
 /**
  * The screen to show. The disclosure always comes BEFORE Android's Accessibility settings: without
  * a consent the page never offers the settings button (and the app refuses to open them anyway).
+ * With some apps agreed to, the disclosure opens only when the user asks to read and agree for the
+ * apps still waiting (the pending card, per-app consent of 0.0.3).
  */
 export function screenFor(state: State | null, ui: UiMemory): Screen {
   if (state === null) return 'web';
   if (!state.consentGiven || state.disclosureVersion !== DISCLOSURE_VERSION) return ui.disclosureOpen ? 'disclosure' : 'intro';
+  if (ui.disclosureOpen && pendingApps(state).length > 0) return 'disclosure';
   return state.serviceEnabled ? 'home' : 'setup';
+}
+
+/**
+ * The watched apps the user has not agreed to yet, while at least one other app is agreed to: a
+ * version added them (per-app consent, UPG-2). Empty before any agreement, where the intro and the
+ * disclosure ask for every app at once.
+ */
+export function pendingApps(state: State): AppInfo[] {
+  return state.consentGiven ? state.apps.filter((a) => !a.agreed) : [];
+}
+
+/** "X", "X and Facebook", "X, Facebook and Snapchat". */
+export function andList(names: readonly string[]): string {
+  if (names.length === 0) throw new Error('no app named');
+  if (names.length === 1) return names[0] as string;
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
+/** The pending card's title and body, or null when no app waits for an agreement. */
+export function pendingCard(state: State): { readonly title: string; readonly body: string; readonly button: string } | null {
+  const waiting = pendingApps(state);
+  if (waiting.length === 0) return null;
+  const names = andList(waiting.map((a) => a.name));
+  return { title: text.pendingTitle(names), body: text.pendingBody(names), button: text.pendingButton };
 }
 
 /** Open the restricted-settings steps at once: a downloaded or local install, or back from settings with the service still off (spec 10.2). */
@@ -112,6 +142,8 @@ export interface AppRow {
   readonly name: string;
   /** null: not selectable in this build ("coming soon"). */
   readonly app: AppInfo | null;
+  /** True for a watched app the user has not agreed to: listed with its note and no mode to choose. */
+  readonly waiting: boolean;
   readonly note: string;
 }
 
@@ -120,33 +152,37 @@ export interface AppRow {
  * and nothing else: none of them is in the service's packageNames, the <queries> block or the
  * disclosure, so StopScroll receives nothing from them (tests/release.test.ts pins that). A release
  * that adds one moves it into rules/screen-rules.json, and the row becomes a real one: 0.0.2 did
- * that for Instagram (Marcos, 2026-10-30).
+ * that for Instagram (Marcos, 2026-10-30), 0.0.3 for X (Marcos, 2026-10-31).
  */
 export const COMING_SOON: readonly { readonly key: string; readonly name: string }[] = [
   { key: 'facebook', name: 'Facebook' },
   { key: 'snapchat', name: 'Snapchat' },
   { key: 'linkedin', name: 'LinkedIn' },
-  { key: 'x', name: 'X' },
 ];
 
 /**
- * The apps the settings list shows: every app the rules cover (YouTube and Instagram since 0.0.2),
- * then the coming-soon apps the rules do not cover yet, disabled.
+ * The apps the settings list shows: every app the rules cover (YouTube, Instagram and X since
+ * 0.0.3), then the coming-soon apps the rules do not cover yet, disabled. A watched app the user has
+ * not agreed to (while others are) shows the waiting note and no mode buttons.
  */
 export function appRows(state: State): AppRow[] {
-  const rows: AppRow[] = state.apps.map((a) => ({
-    key: a.id,
-    name: a.name,
-    app: a,
-    note: a.installed ? text.appInstalled(a.name, a.versionName) : text.appNotInstalled(a.name),
-  }));
+  const rows: AppRow[] = state.apps.map((a) => {
+    const waiting = state.consentGiven && !a.agreed;
+    return {
+      key: a.id,
+      name: a.name,
+      app: a,
+      waiting,
+      note: waiting ? text.appWaiting(a.name) : a.installed ? text.appInstalled(a.name, a.versionName) : text.appNotInstalled(a.name),
+    };
+  });
   for (const c of COMING_SOON) {
-    if (!state.apps.some((a) => a.id === c.key)) rows.push({ key: c.key, name: c.name, app: null, note: text.comingSoonLabel });
+    if (!state.apps.some((a) => a.id === c.key)) rows.push({ key: c.key, name: c.name, app: null, waiting: false, note: text.comingSoonLabel });
   }
   return rows;
 }
 
-/** "the YouTube app", "the YouTube or Instagram app", "the YouTube, Instagram or Facebook app". */
+/** "the YouTube app", "the YouTube or Instagram app", "the YouTube, Instagram or X app". */
 export function appList(names: readonly string[]): string {
   if (names.length === 0) throw new Error('no app named');
   if (names.length === 1) return `the ${names[0]} app`;
@@ -158,16 +194,16 @@ export interface Paragraph {
   readonly body: string;
 }
 
-/** The in-app prominent disclosure (spec 12.3), naming exactly the apps this build watches. */
+/** The in-app prominent disclosure (spec 12.3), naming exactly the apps this build watches (all of them, agreed or not). */
 export function disclosure(state: State): { readonly title: string; readonly paragraphs: readonly Paragraph[] } {
   return { title: text.disclosureTitle, paragraphs: text.disclosure(appList(state.apps.map((a) => a.name))) };
 }
 
-/** The line at the top of the app screen. */
+/** The line at the top of the app screen. Only the apps agreed to count: one still waiting is not on. */
 export function statusLine(state: State): string {
   if (!state.consentGiven) return text.statusNoConsent;
   if (!state.serviceEnabled) return text.statusOff;
-  if (state.apps.every((a) => a.mode === 'off')) return text.statusAllOff;
+  if (state.apps.filter((a) => a.agreed).every((a) => a.mode === 'off')) return text.statusAllOff;
   return text.statusOn;
 }
 

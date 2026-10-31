@@ -15,7 +15,7 @@ package no.stormberry.stopscroll
 
 /** The two messages, and how long each stays at least (about a short Toast, the pause one longer). */
 enum class NoticeKind(val baseMs: Long) {
-    /** "StopScroll closed %1$s", with the rules' feedName (YouTube Shorts, Instagram Reels). */
+    /** "StopScroll closed %1$s", with the rules' feedName (YouTube Shorts, Instagram Reels, the X video feed). */
     CLOSED(2_000L),
 
     /** "StopScroll paused for 30 seconds in %1$s ...", with the app name: it asks the user to act. */
@@ -115,7 +115,7 @@ object NoticeStyle {
     const val CORNER_DP = 16
     const val OUTLINE_DP = 1
 
-    /** Above the navigation bar (the window keeps clear of the system bars), about where a Toast sits. */
+    /** Above the navigation bar (NoticeWindow adds the bar's height itself, P1 of 0.0.3), about where a Toast sits. */
     const val BOTTOM_GAP_DP = 48
 
     /** The gap kept on each side, and the widest the card gets on a large screen. */

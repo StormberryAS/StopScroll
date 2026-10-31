@@ -37,7 +37,7 @@ object LinkList {
      * screen content. [packageName] is the running app's own (Context.packageName), so the Play
      * edition reports no.stormberry.stopscroll.play; it is never written here. [apps] is each watched
      * app's name and installed version (null: not installed), in the rules' order: one line each
-     * (0.0.2: YouTube and Instagram, approved 30 October 2026; 0.0.1 had the one YouTube line).
+     * (0.0.3: YouTube, Instagram and X; 0.0.2 had YouTube and Instagram, 0.0.1 the one YouTube line).
      */
     fun email(versionName: String, versionCode: Long, packageName: String, androidRelease: String, apps: List<Pair<String, String?>>): String {
         val subject = "StopScroll $versionName: missed a feed or blocked a normal video"

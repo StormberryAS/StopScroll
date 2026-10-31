@@ -11,6 +11,7 @@ import {
   healthLine,
   longDate,
   parseState,
+  pendingCard,
   restrictedHelpOpen,
   screenFor,
   showAdvancedProtection,
@@ -106,8 +107,23 @@ function restrictedHelp(s: State): HTMLElement {
   return details;
 }
 
+// A version added an app the user has not agreed to (per-app consent, 0.0.3): the card at the top of
+// the setup and home screens. "Read and agree" opens the full disclosure, which names every app.
+function pending(s: State): HTMLElement | null {
+  const p = pendingCard(s);
+  if (!p) return null;
+  return h('section', { class: 'card pending' },
+    h('h2', {}, p.title),
+    h('p', {}, p.body),
+    h('div', { class: 'actions' }, button(p.button, 'primary', () => {
+      ui = { disclosureOpen: true };
+      draw();
+    })));
+}
+
 function setupScreen(s: State): HTMLElement[] {
   return [
+    pending(s),
     card(text.setupTitle,
       h('p', {}, text.setupBody),
       s.consentDate ? h('p', { class: 'muted' }, text.agreedOn(longDate(s.consentDate))) : null,
@@ -115,7 +131,7 @@ function setupScreen(s: State): HTMLElement[] {
       restrictedHelp(s),
       showAdvancedProtection(s) ? h('p', { class: 'hint' }, text.advancedProtection) : null),
     appsCard(s),
-  ];
+  ].filter((e): e is HTMLElement => e !== null);
 }
 
 function modeChoice(a: AppInfo): HTMLElement {
@@ -135,7 +151,12 @@ function modeChoice(a: AppInfo): HTMLElement {
 function appsCard(s: State): HTMLElement {
   const all = appRows(s);
   const rows = all.map((row) =>
-    row.app
+    row.app && row.waiting
+      // Watched, but not agreed to yet: its name and the waiting note, nothing to choose (0.0.3).
+      ? h('div', { class: 'app-row waiting' },
+        h('h3', {}, row.name),
+        h('p', { class: 'muted' }, row.note))
+      : row.app
       ? h('div', { class: 'app-row' },
         h('h3', {}, row.name),
         modeChoice(row.app),
@@ -151,12 +172,13 @@ function appsCard(s: State): HTMLElement {
 
 function homeScreen(s: State): HTMLElement[] {
   return [
+    pending(s),
     appsCard(s),
     card(null,
       h('p', {}, h('a', { href: 'mailto:info@stormberry.as', 'data-link': 'email' }, text.missedFeed))),
     card(text.turnOffTitle, h('p', {}, text.turnOffBody),
       h('div', { class: 'actions' }, button(text.turnOff, 'secondary', () => void act(() => (host as AppHost).turnOff())))),
-  ];
+  ].filter((e): e is HTMLElement => e !== null);
 }
 
 function webScreen(): HTMLElement[] {

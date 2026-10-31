@@ -10,9 +10,9 @@ import org.json.JSONObject
  *
  *   page to app   { v, type, id, ... }
  *     getState                          the state below
- *     setMode { app, mode }             app: a watched package; mode: off | always
- *     recordConsent { version }         the disclosure version the user agreed to
- *     openAccessibilitySettings         refused unless a valid consent is stored
+ *     setMode { app, mode }             app: a watched package the user has agreed to; mode: off | always
+ *     recordConsent { version }         the disclosure version the user agreed to (it covers every watched app)
+ *     openAccessibilitySettings         refused unless at least one app is agreed to
  *     openAppInfo                       Android's App info page for StopScroll (restricted settings)
  *     turnOff                           the service switches itself off (disableSelf)
  *     openLink { link }                 an ID from LinkList, never an address
@@ -21,6 +21,9 @@ import org.json.JSONObject
  *     { v, type: 'result', id, ok, error? }
  *
  * Settings live in Kotlin (the service reads them); the page keeps nothing in localStorage.
+ *
+ * Per-app consent (0.0.3, UPG-2): consentGiven means at least one app is agreed to, and each app row
+ * carries agreed. An app not agreed to has no mode to set: setMode for it is refused here.
  */
 sealed interface Command {
     val id: Int
@@ -37,7 +40,8 @@ sealed interface Command {
 /** Everything the page shows, gathered by MainActivity. */
 data class AppState(
     val consent: ConsentRecord?,
-    val consentValid: Boolean,
+    /** At least one watched app is agreed to (Consent.agreedApps is not empty). */
+    val anyAgreed: Boolean,
     val serviceEnabled: Boolean,
     val serviceRunning: Boolean,
     val sdk: Int,
@@ -55,6 +59,8 @@ data class AppRow(
     val name: String,
     val feedName: String,
     val mode: Mode,
+    /** The stored consent covers this app (per-app consent, 0.0.3). */
+    val agreed: Boolean,
     val installed: Boolean,
     val versionName: String?,
     val stats: AppStats,
@@ -64,7 +70,8 @@ object Bridge {
     const val VERSION = 1
     private val TYPES = setOf("getState", "setMode", "recordConsent", "openAccessibilitySettings", "openAppInfo", "turnOff", "openLink")
 
-    fun parse(text: String, watched: List<String>): Command? {
+    /** Checks [text]; [watched] are the packages the rules cover, [agreed] those the stored consent covers. */
+    fun parse(text: String, watched: List<String>, agreed: List<String>): Command? {
         val o = try {
             JSONObject(text)
         } catch (_: Exception) {
@@ -80,7 +87,7 @@ object Bridge {
             "setMode" -> {
                 val app = o.optString("app")
                 val mode = Mode.fromWire(o.optString("mode"))
-                if (app !in watched || mode == null) null else Command.SetMode(id, app, mode)
+                if (app !in watched || app !in agreed || mode == null) null else Command.SetMode(id, app, mode)
             }
             "recordConsent" -> o.optInt("version", -1).takeIf { it == Consent.DISCLOSURE_VERSION }?.let { Command.RecordConsent(id, it) }
             "openAccessibilitySettings" -> Command.OpenAccessibilitySettings(id)
@@ -93,8 +100,8 @@ object Bridge {
 
     fun state(s: AppState, id: Int?): String {
         val state = JSONObject()
-            .put("consentGiven", s.consentValid)
-            .put("consentDate", if (s.consentValid) s.consent?.date else JSONObject.NULL)
+            .put("consentGiven", s.anyAgreed)
+            .put("consentDate", if (s.anyAgreed) s.consent?.date else JSONObject.NULL)
             .put("serviceEnabled", s.serviceEnabled)
             .put("serviceRunning", s.serviceRunning)
             .put("sdk", s.sdk)
@@ -114,6 +121,7 @@ object Bridge {
                                 .put("name", a.name)
                                 .put("feedName", a.feedName)
                                 .put("mode", a.mode.wire)
+                                .put("agreed", a.agreed)
                                 .put("installed", a.installed)
                                 .put("versionName", a.versionName ?: JSONObject.NULL)
                                 .put("closed", a.stats.closed)

@@ -7,7 +7,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The empty-package trap (review B1): packageNames is never empty, on any path. */
+/** The empty-package trap (review B1): packageNames is never empty, on any path; per-app consent (0.0.3). */
 class ServiceConfigTest {
     private val yt = "com.google.android.youtube"
     private val watched = listOf(yt)
@@ -18,14 +18,14 @@ class ServiceConfigTest {
     }
 
     @Test fun consentAndAlwaysBlockWatchYouTube() {
-        val p = ServiceConfig.plan(watched, mapOf(yt to Mode.ALWAYS), consent = true)
+        val p = ServiceConfig.plan(watched, mapOf(yt to Mode.ALWAYS), agreed = watched)
         assertEquals(listOf(yt), p.packages)
         assertEquals(ServiceConfig.EVENT_TYPES, p.eventTypes)
         assertTrue(p.active)
     }
 
     @Test fun everyAppOffKeepsTheListAndDropsTheEventTypesToZero() {
-        val p = ServiceConfig.plan(watched, mapOf(yt to Mode.OFF), consent = true)
+        val p = ServiceConfig.plan(watched, mapOf(yt to Mode.OFF), agreed = watched)
         assertEquals(listOf(yt), p.packages)
         assertEquals(0, p.eventTypes)
         assertFalse(p.active)
@@ -33,57 +33,76 @@ class ServiceConfigTest {
 
     @Test fun noConsentKeepsTheListAndReceivesNothing() {
         for (mode in Mode.entries) {
-            val p = ServiceConfig.plan(watched, mapOf(yt to mode), consent = false)
+            val p = ServiceConfig.plan(watched, mapOf(yt to mode), agreed = emptyList())
             assertEquals(listOf(yt), p.packages)
             assertEquals(0, p.eventTypes)
         }
-        val p = ServiceConfig.plan(watched, emptyMap(), consent = false)
+        val p = ServiceConfig.plan(watched, emptyMap(), agreed = emptyList())
         assertEquals(listOf(yt), p.packages)
         assertEquals(0, p.eventTypes)
     }
 
-    @Test fun noCombinationEverGivesAnEmptyListOrAPackageOutsideTheWatchedOnes() {
-        val three = listOf(yt, "com.instagram.android", "com.facebook.katana")
+    @Test fun noCombinationEverGivesAnEmptyListAPackageOutsideTheWatchedOnesOrAnUnagreedApp() {
+        val three = listOf(yt, "com.instagram.android", "com.twitter.android")
         val choices = listOf<Mode?>(null) + Mode.entries
-        for (a in choices) for (b in choices) for (c in choices) for (consent in listOf(true, false)) {
+        // Every subset of the three as the agreed apps.
+        val subsets = (0 until 8).map { bits -> three.filterIndexed { i, _ -> bits and (1 shl i) != 0 } }
+        var active = 0
+        for (a in choices) for (b in choices) for (c in choices) for (agreed in subsets) {
             val modes = listOfNotNull(a?.let { three[0] to it }, b?.let { three[1] to it }, c?.let { three[2] to it }).toMap()
-            val p = ServiceConfig.plan(three, modes, consent)
-            assertTrue("$modes $consent", p.packages.isNotEmpty())
-            assertTrue("$modes $consent", three.containsAll(p.packages))
-            if (p.active) assertTrue(p.packages.all { modes[it] == Mode.ALWAYS })
+            val p = ServiceConfig.plan(three, modes, agreed)
+            assertTrue("$modes $agreed", p.packages.isNotEmpty())
+            assertTrue("$modes $agreed", three.containsAll(p.packages))
+            if (p.active) {
+                active++
+                assertTrue("$modes $agreed", p.packages.all { modes[it] == Mode.ALWAYS && it in agreed })
+                // Exactly the agreed apps that are on: none is left out either.
+                assertEquals(three.filter { modes[it] == Mode.ALWAYS && it in agreed }, p.packages)
+            } else {
+                assertEquals("inactive keeps the full list", three, p.packages)
+                assertTrue(three.none { modes[it] == Mode.ALWAYS && it in agreed })
+            }
         }
+        assertTrue(active > 0)
     }
 
-    @Test fun youTubeAndInstagramEachFollowTheirOwnMode() {
+    @Test fun youTubeInstagramAndXEachFollowTheirOwnMode() {
         val ig = "com.instagram.android"
-        val both = listOf(yt, ig)
-        assertEquals(both, Repo.rules.packages)
-        assertEquals(both, ServiceConfig.plan(both, mapOf(yt to Mode.ALWAYS, ig to Mode.ALWAYS), true).packages)
-        val igOff = ServiceConfig.plan(both, mapOf(yt to Mode.ALWAYS, ig to Mode.OFF), true)
-        assertEquals(listOf(yt), igOff.packages)
+        val x = "com.twitter.android"
+        val all = listOf(yt, ig, x)
+        assertEquals(all, Repo.rules.packages)
+        assertEquals(all, ServiceConfig.plan(all, mapOf(yt to Mode.ALWAYS, ig to Mode.ALWAYS, x to Mode.ALWAYS), all).packages)
+        val igOff = ServiceConfig.plan(all, mapOf(yt to Mode.ALWAYS, ig to Mode.OFF, x to Mode.ALWAYS), all)
+        assertEquals(listOf(yt, x), igOff.packages)
         assertFalse(ServiceConfig.mayRead(igOff, ig))
-        val ytOff = ServiceConfig.plan(both, mapOf(yt to Mode.OFF, ig to Mode.ALWAYS), true)
-        assertEquals(listOf(ig), ytOff.packages)
-        assertTrue(ServiceConfig.mayRead(ytOff, ig))
-        // Instagram is Always block until the user chooses (spec 6.6), and inert until consent.
+        val onlyX = ServiceConfig.plan(all, mapOf(yt to Mode.OFF, ig to Mode.OFF, x to Mode.ALWAYS), all)
+        assertEquals(listOf(x), onlyX.packages)
+        assertTrue(ServiceConfig.mayRead(onlyX, x))
+        // X is Always block until the user chooses (spec 6.6), and inert until it is agreed to.
         val fresh = SettingsModel()
-        assertEquals(Mode.ALWAYS, fresh.mode(ig))
-        assertEquals(both, ServiceConfig.plan(both, fresh.modesFor(both), true).packages)
+        assertEquals(Mode.ALWAYS, fresh.mode(x))
+        assertEquals(all, ServiceConfig.plan(all, fresh.modesFor(all), all).packages)
+        assertEquals(listOf(yt, ig), ServiceConfig.plan(all, fresh.modesFor(all), listOf(yt, ig)).packages)
+        // Only X on, but X not agreed: nothing active, the full list kept.
+        val xWaiting = ServiceConfig.plan(all, mapOf(yt to Mode.OFF, ig to Mode.OFF, x to Mode.ALWAYS), listOf(yt, ig))
+        assertFalse(xWaiting.active)
+        assertEquals(all, xWaiting.packages)
+        assertFalse(ServiceConfig.mayRead(xWaiting, x))
     }
 
     @Test fun anEmptyWatchedListIsRefused() {
-        assertThrows(IllegalArgumentException::class.java) { ServiceConfig.plan(emptyList(), emptyMap(), true) }
+        assertThrows(IllegalArgumentException::class.java) { ServiceConfig.plan(emptyList(), emptyMap(), listOf(yt)) }
     }
 
     @Test fun theWindowCheckReadsOnlyActiveWatchedPackages() {
-        val on = ServiceConfig.plan(watched, mapOf(yt to Mode.ALWAYS), true)
+        val on = ServiceConfig.plan(watched, mapOf(yt to Mode.ALWAYS), watched)
         assertTrue(ServiceConfig.mayRead(on, yt))
         assertFalse(ServiceConfig.mayRead(on, "com.example.bank"))
         assertFalse(ServiceConfig.mayRead(on, "com.android.launcher3"))
         assertFalse(ServiceConfig.mayRead(on, null))
-        val off = ServiceConfig.plan(watched, mapOf(yt to Mode.OFF), true)
+        val off = ServiceConfig.plan(watched, mapOf(yt to Mode.OFF), watched)
         assertFalse(ServiceConfig.mayRead(off, yt))
-        val noConsent = ServiceConfig.plan(watched, mapOf(yt to Mode.ALWAYS), false)
+        val noConsent = ServiceConfig.plan(watched, mapOf(yt to Mode.ALWAYS), emptyList())
         assertFalse(ServiceConfig.mayRead(noConsent, yt))
     }
 

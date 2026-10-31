@@ -33,15 +33,15 @@ matter with its own written agreement, and this is not it.
 
 ## Specific to StopScroll
 
-StopScroll tries to close the short-video feed in the apps it watches. Today it watches YouTube and Instagram. The other apps in its list are not watched yet and are marked "Coming soon".
+StopScroll tries to close the short-video feed in the apps it watches. Today it watches YouTube, Instagram and X. The other apps in its list are not watched yet and are marked "Coming soon".
 
-It recognises the feed by how the app's screen is built. YouTube, Instagram and every other app can change their screens at any time without notice. When that happens, StopScroll may let a feed through, or, rarely, close a screen that is not a feed. Neither is a fault you can claim for, and StopScroll does not promise to block every short video.
+It recognises the feed by how the app's screen is built. YouTube, Instagram, X and every other app can change their screens at any time without notice. When that happens, StopScroll may let a feed through, or, rarely, close a screen that is not a feed. Neither is a fault you can claim for, and StopScroll does not promise to block every short video.
 
 It uses Android's Accessibility service, the strongest access Android gives an app. You switch it on yourself, after you have read what it does, and you can switch it off at any time in the app or in Android's settings. While it is on, each time the screen changes it first checks which app is in front, and it reads the screen only of the apps you set to block. It can press only Back, Home and one tab in the same app. It has no internet permission, so it cannot connect to anything itself, and it keeps only your settings and simple counts on your phone.
 
 StopScroll is a tool to help you keep a habit you chose. It is not a parental control, it is not a medical or therapeutic product, and it cannot stop anyone who wants to turn it off. Some phones, including those with Android's Advanced Protection turned on, do not allow it to run at all.
 
-Because it presses Back and Home for you, it can interrupt what you are doing in the apps it watches, for example a video you meant to keep or a Reel someone sent you in a message. Switch the app to Off whenever you want to use the feed on purpose.
+Because it presses Back and Home for you, it can interrupt what you are doing in the apps it watches, for example a video you meant to keep, a Reel someone sent you in a message or a video you opened full screen in X. Switch the app to Off whenever you want to use the feed on purpose.
 
 **Not affiliated.** StopScroll is not affiliated with or endorsed by Google, YouTube, Meta, Snap, LinkedIn or X. Their names are used only to say which apps StopScroll works with or plans to.
 

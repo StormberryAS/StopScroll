@@ -1,31 +1,29 @@
-StopScroll closes the endless short-video feeds in the YouTube and Instagram apps on your Android phone and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.
+StopScroll closes the endless short-video feeds in the YouTube, Instagram and X apps on your Android phone and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.
+
+In X, the feed is the full-screen video viewer, where you swipe up for the next video. X opens it when you tap a video in the timeline, a post, search or a profile, so StopScroll closes it there too. Videos still play in the timeline, in posts and in search.
 
 No ads, no account, no server calls. StopScroll has no internet permission at all, so it never contacts a server, ours or anyone else's. It shows no ads and needs no account.
 
 For each app you choose: Off, or Always block.
 
-This version works with YouTube and Instagram. Facebook, Snapchat, LinkedIn and X are listed in the app as coming soon. StopScroll does not watch them yet; each one comes in a later release, once its screens have been checked on a phone.
+This version works with YouTube, Instagram and X. More apps will follow in later releases, each one once its screens have been checked on a phone.
 
 How it works: StopScroll uses Android's Accessibility Service, the strongest access Android has, so it is built to be checked.
-- It watches only the YouTube and Instagram apps. Each time it checks the screen, it first reads which app is in front; if that is not one of those two, it stops there and reads nothing else.
-- It reads the names and positions of the parts of the screen to see whether a Shorts or Reels player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.
-- It can press only Back (twice if needed), then one tab in the same app, then Home.
-- It asks first: before Android's Accessibility settings open, the app shows what it looks at, what it does and what it keeps, and waits for "I agree".
+- It watches only the YouTube, Instagram and X apps. Each time it checks the screen, it first reads which app is in front; if that is not one of those three, it stops there and reads nothing else.
+- It reads the names and positions of the parts of the screen to see whether a short-video feed is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.
+- It can press only Back (twice if needed), then one tab in the same app where there is one, then Home.
+- It asks first: before Android's Accessibility settings open, and before it watches an app that a later version adds, the app shows what it looks at, what it does and what it keeps, and waits for "I agree".
 - It has no internet permission, so it cannot connect to anything itself. Links open in your browser or mail app, in front of you.
 - It keeps your settings, the date you agreed and a few counts, such as when it last closed a feed, on your phone only, left out of backups.
 - The code is open source (MIT): https://github.com/StormberryAS/StopScroll
 
-No permissions at all. Check for yourself before installing:
+No app permissions at all: Android's App info for StopScroll lists none. The Accessibility access is separate, and you turn it on yourself.
 
-    aapt dump permissions <the APK you downloaded>
-
-The only line you should see is the package name.
-
-What it cannot do: a frame or a moment of sound can get through before the feed closes. When YouTube or Instagram changes its screens, StopScroll may miss the feed until it is updated. On Android 17 with Advanced Protection turned on, Android does not allow apps like StopScroll to use Accessibility.
+What it cannot do: a frame or a moment of sound can get through before the feed closes. When YouTube, Instagram or X changes its screens, StopScroll may miss the feed until it is updated. On Android 17 with Advanced Protection turned on, Android does not allow apps like StopScroll to use Accessibility.
 
 StopScroll is not an accessibility tool and not parental control: you can turn it off at any time, in the app or in Android's settings.
 
-The privacy page and the full disclaimer open from the app's footer. In English only.
+Its settings page runs from inside the app, offline, and every build checks that each bundled file is byte for byte the one in the source code, apart from one added line in index.html that loads the bridge to Android. The privacy page and the full disclaimer open from the app's footer. In English only.
 
 Not affiliated with or endorsed by Google, YouTube, Meta, Snap, LinkedIn or X.
 

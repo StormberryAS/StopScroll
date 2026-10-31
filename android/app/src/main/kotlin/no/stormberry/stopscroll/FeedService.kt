@@ -15,11 +15,13 @@ import android.view.accessibility.AccessibilityEvent
 
 /*
  * The Accessibility Service (spec 6). It does four things and nothing else:
- *   - keeps Android's filter right: packageNames limited to the watched apps, never empty; event
- *     types 0 while no app is on or consent is missing (ServiceConfig);
+ *   - keeps Android's filter right: packageNames limited to the watched apps that are on and agreed
+ *     to, never empty; event types 0 while no such app exists (ServiceConfig, Consent.agreedApps);
  *   - on a window or content change from a watched app, checks the screen through NodeFacts (the
- *     window check first, then only the IDs the rules name) and the rules (ScreenRules);
- *   - when the feed is open, runs the leave ladder (LeaveLadder): Back, Back, the tab or Home, Home;
+ *     window check first, then only the IDs the rules name, and in X the short tag walk) and the
+ *     rules (ScreenRules);
+ *   - when the feed is open, runs the leave ladder (LeaveLadder): Back, Back, the tab or Home, Home
+ *     (X's viewer has no tab bar, so there it is Back, Back, Home);
  *   - shows a short on-screen message saying why the screen changed (Notice.kt, NoticeWindow: its own
  *     Accessibility overlay window, because Android drops a Toast from an app without notifications,
  *     decision D2), and counts what it did (Settings).
@@ -61,7 +63,7 @@ class FeedService : AccessibilityService() {
     /** Applies the plan to the CURRENT service info; never a new one (an info without its list means every app). */
     private fun applyPlan() {
         val s = SettingsStore.get(this)
-        val next = ServiceConfig.plan(rules.packages, s.modesFor(rules.packages), Consent.isValid(s.consent, rules.packages))
+        val next = ServiceConfig.plan(rules.packages, s.modesFor(rules.packages), Consent.agreedApps(s.consent, rules.packages))
         check(next.packages.isNotEmpty())
         val info = serviceInfo ?: return
         info.packageNames = next.packages.toTypedArray()

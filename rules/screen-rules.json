@@ -1,7 +1,7 @@
 {
-  "schema": 1,
-  "rulesVersion": "2026-10-30.1",
-  "date": "2026-10-30",
+  "schema": 2,
+  "rulesVersion": "2026-10-31.1",
+  "date": "2026-10-31",
   "apps": [
     {
       "id": "youtube",
@@ -69,6 +69,32 @@
           "appVersionCode": 385914557,
           "date": "2026-10-30",
           "how": "uiautomator dumps, sanitised into tests/fixtures/instagram/"
+        }
+      ]
+    },
+    {
+      "id": "x",
+      "package": "com.twitter.android",
+      "name": "X",
+      "feedName": "the X video feed",
+      "surfaces": [
+        {
+          "id": "video-viewer",
+          "match": { "tag": { "id": "VideoTab", "minHeight": 0.8 } },
+          "exclude": [
+            { "tag": { "id": "MediaGallery" } },
+            { "tag": { "id": "PostDetail" } }
+          ]
+        }
+      ],
+      "verifiedOn": [
+        {
+          "device": "Pixel, Android 17",
+          "android": "17",
+          "appVersionName": "12.38.1-prod.01",
+          "appVersionCode": 312381001,
+          "date": "2026-10-31",
+          "how": "uiautomator dumps, sanitised into tests/fixtures/x/"
         }
       ]
     }

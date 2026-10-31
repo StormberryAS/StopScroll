@@ -1,5 +1,5 @@
 import { DISCLOSURE_VERSION, text } from './core/copy.js';
-import { appRows, disclosure, healthLine, longDate, parseState, restrictedHelpOpen, screenFor, showAdvancedProtection, statusLine, } from './core/flow.js';
+import { appRows, disclosure, healthLine, longDate, parseState, pendingCard, restrictedHelpOpen, screenFor, showAdvancedProtection, statusLine, } from './core/flow.js';
 function h(tag, attrs = {}, ...children) {
     const el = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs))
@@ -70,11 +70,21 @@ function restrictedHelp(s) {
     details.open = restrictedHelpOpen(s);
     return details;
 }
+function pending(s) {
+    const p = pendingCard(s);
+    if (!p)
+        return null;
+    return h('section', { class: 'card pending' }, h('h2', {}, p.title), h('p', {}, p.body), h('div', { class: 'actions' }, button(p.button, 'primary', () => {
+        ui = { disclosureOpen: true };
+        draw();
+    })));
+}
 function setupScreen(s) {
     return [
+        pending(s),
         card(text.setupTitle, h('p', {}, text.setupBody), s.consentDate ? h('p', { class: 'muted' }, text.agreedOn(longDate(s.consentDate))) : null, h('div', { class: 'actions' }, button(text.openSettings, 'primary', () => void act(() => host.openAccessibilitySettings()))), restrictedHelp(s), showAdvancedProtection(s) ? h('p', { class: 'hint' }, text.advancedProtection) : null),
         appsCard(s),
-    ];
+    ].filter((e) => e !== null);
 }
 function modeChoice(a) {
     const group = h('div', { class: 'modes', role: 'radiogroup', 'aria-label': a.name });
@@ -92,18 +102,21 @@ function modeChoice(a) {
 }
 function appsCard(s) {
     const all = appRows(s);
-    const rows = all.map((row) => row.app
-        ? h('div', { class: 'app-row' }, h('h3', {}, row.name), modeChoice(row.app), h('p', { class: 'muted' }, row.note), h('p', { class: 'muted' }, healthLine(row.app)), row.app.closed + row.app.loopPauses > 0 ? h('p', { class: 'muted' }, text.counts(row.app.closed, row.app.loopPauses)) : null)
-        : h('div', { class: 'app-row disabled', 'aria-disabled': 'true' }, h('h3', {}, row.name, ' ', h('span', { class: 'soon' }, row.note))));
+    const rows = all.map((row) => row.app && row.waiting
+        ? h('div', { class: 'app-row waiting' }, h('h3', {}, row.name), h('p', { class: 'muted' }, row.note))
+        : row.app
+            ? h('div', { class: 'app-row' }, h('h3', {}, row.name), modeChoice(row.app), h('p', { class: 'muted' }, row.note), h('p', { class: 'muted' }, healthLine(row.app)), row.app.closed + row.app.loopPauses > 0 ? h('p', { class: 'muted' }, text.counts(row.app.closed, row.app.loopPauses)) : null)
+            : h('div', { class: 'app-row disabled', 'aria-disabled': 'true' }, h('h3', {}, row.name, ' ', h('span', { class: 'soon' }, row.note))));
     const soon = all.some((row) => row.app === null) ? h('p', { class: 'muted soon-note' }, text.comingSoonNote) : null;
     return card(text.appsTitle, ...rows, soon);
 }
 function homeScreen(s) {
     return [
+        pending(s),
         appsCard(s),
         card(null, h('p', {}, h('a', { href: 'mailto:info@stormberry.as', 'data-link': 'email' }, text.missedFeed))),
         card(text.turnOffTitle, h('p', {}, text.turnOffBody), h('div', { class: 'actions' }, button(text.turnOff, 'secondary', () => void act(() => host.turnOff())))),
-    ];
+    ].filter((e) => e !== null);
 }
 function webScreen() {
     return [card(text.webTitle, h('p', {}, text.webBody), h('p', {}, text.tagline))];

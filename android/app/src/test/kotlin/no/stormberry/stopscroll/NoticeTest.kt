@@ -14,6 +14,7 @@ class NoticeTest {
 
     private val youTube = Repo.rules.apps.single { it.id == "youtube" }
     private val instagram = Repo.rules.apps.single { it.id == "instagram" }
+    private val x = Repo.rules.apps.single { it.id == "x" }
 
     /** strings.xml's text for [kind], formatted as Android's getString(id, name) does. */
     private fun words(request: NoticeRequest): String {
@@ -33,6 +34,8 @@ class NoticeTest {
         assertEquals(NoticeRequest(NoticeKind.CLOSED, "Instagram Reels"), Notices.forStep(instagram, step))
         assertEquals("StopScroll closed YouTube Shorts", words(Notices.forStep(youTube, step)!!))
         assertEquals("StopScroll closed Instagram Reels", words(Notices.forStep(instagram, step)!!))
+        assertEquals(NoticeRequest(NoticeKind.CLOSED, "the X video feed"), Notices.forStep(x, step))
+        assertEquals("StopScroll closed the X video feed", words(Notices.forStep(x, step)!!))
     }
 
     @Test fun theLoopGuardsPauseShowsThePauseMessageWithTheAppName() {
@@ -45,6 +48,10 @@ class NoticeTest {
         assertEquals(
             "StopScroll paused for 30 seconds in YouTube. If this keeps happening, please tell us.",
             words(Notices.forStep(youTube, step)!!),
+        )
+        assertEquals(
+            "StopScroll paused for 30 seconds in X. If this keeps happening, please tell us.",
+            words(Notices.forStep(x, step)!!),
         )
     }
 

@@ -2,6 +2,21 @@
 
 StopScroll for Android, newest first. The release text of each version, which GitHub Releases and Zapstore show, is in `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
 
+## 0.0.3 (versionCode 3)
+
+StopScroll now closes X's full-screen video viewer too, the endless video feed X opens when you tap a video, and leaves the rest of X working: the timeline, posts, search, notifications, messages and profiles.
+
+- X moves from "Coming soon" to a normal row: Off or Always block. Facebook, Snapchat and LinkedIn stay coming soon.
+- Closed: the viewer opened from the timeline, a post, search or a profile's Videos tab. Videos still play in the timeline, in posts and in search, and a video in a post with several photos or videos opens in X's gallery, which stays open.
+- How: X names its screens with Jetpack Compose test tags. A new rule selector, `tag`, matches such a name, found by a short walk down the screen's tree (no prefetching, at most 14 levels and 64 nodes, stopping at the first level that holds a tag). It reads the same facts as the view-ID lookups and no text. The rules file is schema 2.
+- Leaving X's viewer: Back, twice if needed, then Home, with the same loop guard.
+- An agreement now counts per app. After the update from 0.0.2, YouTube and Instagram keep working as you set them, and X waits until you open StopScroll and agree; until then StopScroll's code receives nothing from X. An agreement from 0.0.1 still does not count.
+- The short message after a close now sits higher, so it no longer covers the apps' tab bar icons.
+- The service's app list, the package query list, the rules and the release workflow's pinned list cover exactly YouTube, Instagram and X.
+- 22 sanitised X captures (X 12.38.1, Android 17) join the YouTube and Instagram ones in `tests/fixtures/`, and the Kotlin tests run the rules over every one of them.
+- The store description, the screenshots and this release's note are the same on Zapstore and Google Play.
+- Google Play edition: versionName 0.0.3, versionCode 1003. 1002 was built but never uploaded.
+
 ## 0.0.2 (versionCode 2)
 
 StopScroll now closes Instagram Reels too, and leaves the rest of Instagram working: Stories, the home feed, messages, profiles, Explore and search.

@@ -9,15 +9,15 @@ const dayOrNull = (x) => x === null || (isStr(x) && ISO_DAY.test(x));
 function parseApp(x) {
     if (!isObj(x))
         return null;
-    const { id, name, feedName, mode, installed, versionName, closed, loopPauses, lastClosed } = x;
+    const { id, name, feedName, mode, agreed, installed, versionName, closed, loopPauses, lastClosed } = x;
     const pkg = x['package'];
     if (!isStr(id) || !isStr(pkg) || !isStr(name) || !isStr(feedName))
         return null;
     if (mode !== 'off' && mode !== 'always')
         return null;
-    if (!isBool(installed) || !strOrNull(versionName) || !isInt(closed) || !isInt(loopPauses) || !dayOrNull(lastClosed))
+    if (!isBool(agreed) || !isBool(installed) || !strOrNull(versionName) || !isInt(closed) || !isInt(loopPauses) || !dayOrNull(lastClosed))
         return null;
-    return { id, package: pkg, name, feedName, mode, installed, versionName, closed, loopPauses, lastClosed };
+    return { id, package: pkg, name, feedName, mode, agreed, installed, versionName, closed, loopPauses, lastClosed };
 }
 export function parseState(x) {
     if (!isObj(x))
@@ -54,7 +54,26 @@ export function screenFor(state, ui) {
         return 'web';
     if (!state.consentGiven || state.disclosureVersion !== DISCLOSURE_VERSION)
         return ui.disclosureOpen ? 'disclosure' : 'intro';
+    if (ui.disclosureOpen && pendingApps(state).length > 0)
+        return 'disclosure';
     return state.serviceEnabled ? 'home' : 'setup';
+}
+export function pendingApps(state) {
+    return state.consentGiven ? state.apps.filter((a) => !a.agreed) : [];
+}
+export function andList(names) {
+    if (names.length === 0)
+        throw new Error('no app named');
+    if (names.length === 1)
+        return names[0];
+    return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+export function pendingCard(state) {
+    const waiting = pendingApps(state);
+    if (waiting.length === 0)
+        return null;
+    const names = andList(waiting.map((a) => a.name));
+    return { title: text.pendingTitle(names), body: text.pendingBody(names), button: text.pendingButton };
 }
 export function restrictedHelpOpen(state) {
     return state.installedFromFile || (state.returnedFromSettings && !state.serviceEnabled);
@@ -66,18 +85,21 @@ export const COMING_SOON = [
     { key: 'facebook', name: 'Facebook' },
     { key: 'snapchat', name: 'Snapchat' },
     { key: 'linkedin', name: 'LinkedIn' },
-    { key: 'x', name: 'X' },
 ];
 export function appRows(state) {
-    const rows = state.apps.map((a) => ({
-        key: a.id,
-        name: a.name,
-        app: a,
-        note: a.installed ? text.appInstalled(a.name, a.versionName) : text.appNotInstalled(a.name),
-    }));
+    const rows = state.apps.map((a) => {
+        const waiting = state.consentGiven && !a.agreed;
+        return {
+            key: a.id,
+            name: a.name,
+            app: a,
+            waiting,
+            note: waiting ? text.appWaiting(a.name) : a.installed ? text.appInstalled(a.name, a.versionName) : text.appNotInstalled(a.name),
+        };
+    });
     for (const c of COMING_SOON) {
         if (!state.apps.some((a) => a.id === c.key))
-            rows.push({ key: c.key, name: c.name, app: null, note: text.comingSoonLabel });
+            rows.push({ key: c.key, name: c.name, app: null, waiting: false, note: text.comingSoonLabel });
     }
     return rows;
 }
@@ -96,7 +118,7 @@ export function statusLine(state) {
         return text.statusNoConsent;
     if (!state.serviceEnabled)
         return text.statusOff;
-    if (state.apps.every((a) => a.mode === 'off'))
+    if (state.apps.filter((a) => a.agreed).every((a) => a.mode === 'off'))
         return text.statusAllOff;
     return text.statusOn;
 }

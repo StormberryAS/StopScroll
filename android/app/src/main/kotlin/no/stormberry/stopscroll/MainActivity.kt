@@ -185,7 +185,8 @@ class MainActivity : ComponentActivity() {
         if (message.type != WebMessageCompat.TYPE_STRING) return
         replyProxy = proxy
         val rules = Rules.load(this)
-        val cmd = Bridge.parse(message.data ?: return, rules.packages) ?: return
+        val agreed = Consent.agreedApps(SettingsStore.get(this).consent, rules.packages)
+        val cmd = Bridge.parse(message.data ?: return, rules.packages, agreed) ?: return
         when (cmd) {
             is Command.GetState -> send(Bridge.state(state(), cmd.id))
             is Command.SetMode -> {
@@ -193,12 +194,11 @@ class MainActivity : ComponentActivity() {
                 send(Bridge.result(cmd.id, true))
             }
             is Command.RecordConsent -> {
-                SettingsStore.update(this) { it.copy(consent = ConsentRecord(Today.iso(), cmd.version, rules.packages)) }
+                SettingsStore.update(this) { it.copy(consent = Consent.recordFor(Today.iso(), rules.packages)) }
                 send(Bridge.result(cmd.id, true))
             }
             is Command.OpenAccessibilitySettings -> {
-                val s = SettingsStore.get(this)
-                if (!Consent.isValid(s.consent, rules.packages)) {
+                if (agreed.isEmpty()) {
                     send(Bridge.result(cmd.id, false, "no-consent"))
                 } else {
                     val ok = start(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -253,11 +253,12 @@ class MainActivity : ComponentActivity() {
     private fun state(): AppState {
         val rules = Rules.load(this)
         val s = SettingsStore.get(this)
+        val agreed = Consent.agreedApps(s.consent, rules.packages)
         val enabled = serviceEnabled()
         if (enabled) returnedFromSettings = false
         return AppState(
             consent = s.consent,
-            consentValid = Consent.isValid(s.consent, rules.packages),
+            anyAgreed = agreed.isNotEmpty(),
             serviceEnabled = enabled,
             serviceRunning = FeedService.running != null,
             sdk = Build.VERSION.SDK_INT,
@@ -268,7 +269,7 @@ class MainActivity : ComponentActivity() {
             disclosureVersion = Consent.DISCLOSURE_VERSION,
             apps = rules.apps.map { a ->
                 val v = installedVersion(a.packageName)
-                AppRow(a.id, a.packageName, a.name, a.feedName, s.mode(a.packageName), v != null, v, s.stats(a.packageName))
+                AppRow(a.id, a.packageName, a.name, a.feedName, s.mode(a.packageName), a.packageName in agreed, v != null, v, s.stats(a.packageName))
             },
         )
     }

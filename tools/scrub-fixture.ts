@@ -11,16 +11,36 @@
  * resource name, a bounds rectangle, true or false); if any value does not, the tool writes nothing
  * and stops, so a text that slipped into an odd place can never reach a fixture.
  *
+ * Screen tags (0.0.3, decision FX-2). An app built with Jetpack Compose can expose a developer's test
+ * tag as the node's view ID, without a package ("VideoTab"); X does. A bare tag is kept ONLY when it
+ * is on the app's reviewed list in REVIEWED_TAGS below; any other bare tag stops the scrub. So a tag
+ * built from data (a user name, say) can never be committed, and a new screen name is seen by a person
+ * before it enters a fixture. tests/fixtures.test.ts checks every committed tag against this list.
+ * Android reports a stripped resource name as "<package>:id/(name removed)" (Facebook does), which
+ * says nothing: it is kept as an empty view ID and counted.
+ *
  * It prints counts only, never a value from the raw file. Raw dumps stay outside the repository
  * (a private folder, mode 700) and are deleted after the fixtures are reviewed.
  * tests/fixtures.test.ts proves every committed fixture holds nothing but the allowlist.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
+// The reviewed screen tags per app (FX-2, 31 October 2026): every tag seen on X 12.38.1. Instagram's
+// list is empty: its capture blanks its few Compose tags first (FX-1), and no rule needs them.
+// tests/fixtures.test.ts reads this list from this file; keep it on one line per app.
+const REVIEWED_TAGS: Record<string, readonly string[]> = {
+  'com.google.android.youtube': [],
+  'com.instagram.android': [],
+  'com.twitter.android': ['MainLanding', 'scaffold_home_tabbed', 'home_navigation_bar_title', 'timeline_post', 'VideoTab', 'PostDetail', 'post-detail-reply-text-field', 'MediaGallery', 'Search', 'NotificationTabbed', 'UserProfileScreen', 'xchat_pin_entry', 'facepile', 'ntp'],
+};
+const BARE_TAG = /^[A-Za-z][A-Za-z0-9_-]{0,79}$/;
+const NAME_REMOVED = /^[a-z][a-z0-9_.]*:id\/\(name removed\)$/;
+
 const KEEP = ['class', 'resource-id', 'bounds', 'selected'] as const;
 const PATTERN: Record<(typeof KEEP)[number], RegExp> = {
   class: /^[A-Za-z0-9_.$]*$/,
-  'resource-id': /^(?:[a-z][a-z0-9_.]*:id\/[A-Za-z0-9_]+)?$/,
+  // A view ID with its package, a bare screen tag (checked against REVIEWED_TAGS as well), or empty.
+  'resource-id': /^(?:[a-z][a-z0-9_.]*:id\/[A-Za-z0-9_]+|[A-Za-z][A-Za-z0-9_-]{0,79})?$/,
   bounds: /^\[\d{1,5},\d{1,5}\]\[\d{1,5},\d{1,5}\]$/,
   selected: /^(?:true|false)$/,
 };
@@ -54,9 +74,12 @@ const expectedNodes = raw.split('<node ').length - 1;
 const TAG = /<(\/?)(node|hierarchy)\b((?:[^>"]|"[^"]*")*?)(\/?)>/g;
 const ATTR = /\s([A-Za-z_:-]+)="([^"]*)"/g;
 
+const reviewed = new Set(REVIEWED_TAGS[app] ?? []);
 const lines: string[] = [];
 let depth = 0;
 let nodes = 0;
+let tags = 0;
+let removedNames = 0;
 let rootPackageSeen = false;
 for (const m of raw.matchAll(TAG)) {
   const [, closing, tag, body = '', selfClosing] = m;
@@ -72,6 +95,14 @@ for (const m of raw.matchAll(TAG)) {
   if (!rootPackageSeen) {
     if (attrs.get('package') !== app) fail('the first node does not belong to the --app package');
     rootPackageSeen = true;
+  }
+  const rid = attrs.get('resource-id');
+  if (rid !== undefined && NAME_REMOVED.test(rid)) {
+    attrs.set('resource-id', '');
+    removedNames += 1;
+  } else if (rid !== undefined && BARE_TAG.test(rid)) {
+    if (!reviewed.has(rid)) fail('a screen tag is not on the reviewed list for --app (REVIEWED_TAGS)');
+    tags += 1;
   }
   const kept = KEEP.map((k) => {
     const v = attrs.get(k);
@@ -95,4 +126,4 @@ const header = [
   `<fixture app="${app}" label="${label}" expect="${expect}" captured="${captured}" device="${device}" android="${android}" source="uiautomator">`,
 ];
 writeFileSync(outPath, [...header, ...lines, '</fixture>', ''].join('\n'));
-console.log(`scrub-fixture: ${label}: ${nodes} nodes kept, 4 attributes each`);
+console.log(`scrub-fixture: ${label}: ${nodes} nodes kept, 4 attributes each, ${tags} reviewed screen tags${removedNames ? `, ${removedNames} '(name removed)' IDs emptied` : ''}`);

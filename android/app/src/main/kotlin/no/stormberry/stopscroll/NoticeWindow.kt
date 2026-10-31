@@ -9,6 +9,7 @@ import android.os.SystemClock
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
@@ -20,8 +21,12 @@ import android.widget.TextView
  *   - Never in the way: FLAG_NOT_FOCUSABLE and FLAG_NOT_TOUCHABLE, so it never takes a tap, a key or
  *     the focus, and Back still goes to the app below. Android treats an Accessibility overlay as a
  *     trusted overlay, so taps on the app below pass through it too.
- *   - Placed like a Toast: bottom centre, kept clear of the system bars (the window's default
- *     fitInsetsTypes), [NoticeStyle.BOTTOM_GAP_DP] above the navigation bar, Android's Toast animation.
+ *   - Placed like a Toast: bottom centre, [NoticeStyle.BOTTOM_GAP_DP] above the navigation bar,
+ *     Android's Toast animation. The window asks Android to fit no insets (fitInsetsTypes 0), so its
+ *     frame ends at the bottom of the screen on every Android version, and the navigation bar's
+ *     height is added to y here (decision P1 of 0.0.3). Without that the card covered the top of the
+ *     apps' tab bars (seen on Android 16 and 17, where Android applied no inset to this overlay); with
+ *     Android's default fitting as well, Android 13 and 14 could inset it a second time.
  *   - Readable: light or dark card from the current theme, the text in sp (it follows the font size),
  *     drawn again on a configuration change (theme, font size, rotation) with the same words and end.
  *   - Announced: the card is an accessibility pane titled with the message, so TalkBack says it when
@@ -95,7 +100,7 @@ class NoticeWindow(private val service: AccessibilityService, private val main: 
         val label = card(message, announce)
         drawnFor = look
         try {
-            wm.addView(label, params(animate))
+            wm.addView(label, params(animate, wm))
             view = label
         } catch (_: RuntimeException) {
             // BadTokenException (the service is going away), InvalidDisplayException, an "unknown
@@ -138,8 +143,14 @@ class NoticeWindow(private val service: AccessibilityService, private val main: 
         return label
     }
 
-    private fun params(animate: Boolean): WindowManager.LayoutParams {
+    private fun params(animate: Boolean, wm: WindowManager): WindowManager.LayoutParams {
         val density = service.resources.displayMetrics.density
+        // The navigation bar's height, even while an app hides it (0 if Android cannot say).
+        val navBar = try {
+            wm.currentWindowMetrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars()).bottom
+        } catch (_: RuntimeException) {
+            0
+        }
         return WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -148,10 +159,11 @@ class NoticeWindow(private val service: AccessibilityService, private val main: 
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            y = (NoticeStyle.BOTTOM_GAP_DP * density + 0.5f).toInt()
+            y = navBar + (NoticeStyle.BOTTOM_GAP_DP * density + 0.5f).toInt()
             windowAnimations = if (animate) android.R.style.Animation_Toast else 0
-            // Like a Toast: clear of the navigation bar even while an app hides it.
-            setFitInsetsIgnoringVisibility(true)
+            // No inset fitting by Android, on any version: y above is the only inset, so the card sits
+            // the same distance above the navigation bar's place, even while an app hides the bar.
+            fitInsetsTypes = 0
         }
     }
 }

@@ -7,12 +7,14 @@ package no.stormberry.stopscroll
  * (AbstractAccessibilityServiceConnection: packageNames.isEmpty() || packageNames.contains(...)), and
  * setServiceInfo with a null list clears it. So the list is never empty and never null:
  *   - only the user's manual Off removes a package;
- *   - when no app is on, or consent is missing, the list stays non-empty (every package the rules
+ *   - when no app is on, or no app is agreed to, the list stays non-empty (every package the rules
  *     cover) and the event types drop to 0, because canReceiveEventsLocked() is false when
  *     mEventTypes == 0;
+ *   - while the plan is active, the list holds only apps that are set to Always block AND agreed to
+ *     (per-app consent, 0.0.3): an app the user has not agreed to never reaches the runtime list;
  *   - FeedService applies a plan to the service's CURRENT AccessibilityServiceInfo and never builds
  *     a new one (tests/guards.test.ts fails on a constructor call).
- * ServiceConfigTest runs every combination of modes and consent and fails if any plan is empty.
+ * ServiceConfigTest runs every combination of modes and agreed apps and fails if any plan is empty.
  */
 
 enum class Mode(val wire: String) {
@@ -41,13 +43,13 @@ object ServiceConfig {
     const val EVENT_TYPES = TYPE_WINDOW_STATE_CHANGED or TYPE_WINDOW_CONTENT_CHANGED
 
     /**
-     * The plan for [watched] (the packages the rules cover, never empty), the user's [modes] and
-     * whether a valid [consent] is stored.
+     * The plan for [watched] (the packages the rules cover, never empty), the user's [modes] and the
+     * packages the stored consent covers ([agreed], Consent.agreedApps).
      */
-    fun plan(watched: List<String>, modes: Map<String, Mode>, consent: Boolean): ServicePlan {
+    fun plan(watched: List<String>, modes: Map<String, Mode>, agreed: Collection<String>): ServicePlan {
         require(watched.isNotEmpty()) { "the watched list is empty; an empty packageNames means every app" }
-        val on = watched.filter { modes[it] == Mode.ALWAYS }
-        return if (!consent || on.isEmpty()) {
+        val on = watched.filter { modes[it] == Mode.ALWAYS && it in agreed }
+        return if (on.isEmpty()) {
             ServicePlan(watched.toList(), 0)
         } else {
             ServicePlan(on, EVENT_TYPES)

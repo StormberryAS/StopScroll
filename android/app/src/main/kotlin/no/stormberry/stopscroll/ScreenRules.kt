@@ -8,16 +8,24 @@ import org.json.JSONObject
  * the APK's assets. Pure Kotlin: no Android type, so the JVM unit tests run the very code the
  * service runs, over sanitised fixtures of real screens.
  *
- * A rule never sees text. It sees NodeFact, which has no text field: a view ID, a class name, the
- * bounds as fractions of the screen, visible and selected. IDs match exactly, never by prefix (the
- * normal YouTube player carries reel_time_bar too, spec 6.4).
+ * A rule never sees text. It sees NodeFact, which has no text field: a view ID or a screen tag, a
+ * class name, the bounds as fractions of the screen, visible and selected. IDs match exactly, never
+ * by prefix (the normal YouTube player carries reel_time_bar too, spec 6.4).
+ *
+ * Schema 2 (0.0.3, X): a second selector kind, `tag`, for the names an app built with Jetpack Compose
+ * gives its screens (test tags, which X exposes as view IDs without a package: "VideoTab"). A tag is
+ * a developer's name for a part of the screen, never on-screen text. Android cannot look a tag up by
+ * name (findAccessibilityNodeInfosByViewId resolves real View IDs only), so NodeFacts finds tags with
+ * a short walk (TagWalk.kt), and a tag fact carries `tag = true`: a `node` selector matches only
+ * facts from a view-ID lookup and a `tag` selector only facts from the walk, so a view and a tag of
+ * the same name can never stand in for each other. A schema 1 reader refuses this file.
  *
  * Fail open: a screen no rule matches is allowed. A wrong block is worse than a missed feed.
  */
 
 /** What the service may know about one node. Deliberately no text, no description, no hint. */
 data class NodeFact(
-    /** The view ID without its package prefix ("reel_watch_player"), or "" when it has none. */
+    /** The view ID without its package prefix ("reel_watch_player"), or the bare tag ("VideoTab"); "" when it has none. */
     val id: String,
     val className: String,
     /** Bounds as fractions of the screen, 0.0 to 1.0. */
@@ -27,6 +35,8 @@ data class NodeFact(
     val bottom: Double,
     val visible: Boolean,
     val selected: Boolean,
+    /** True when [id] is a screen tag found by the walk (schema 2), false for a view-ID lookup. */
+    val tag: Boolean = false,
 ) {
     val width: Double get() = (right - left).coerceAtLeast(0.0)
     val height: Double get() = (bottom - top).coerceAtLeast(0.0)
@@ -43,6 +53,15 @@ sealed interface Selector {
     data class All(val of: List<Selector>) : Selector
     data class Not(val of: Selector) : Selector
     data class Node(
+        val id: String,
+        val className: String? = null,
+        val minHeight: Double? = null,
+        val minWidth: Double? = null,
+        val selected: Boolean? = null,
+    ) : Selector
+
+    /** A screen tag (schema 2): matches only facts the tag walk found. The same keys as [Node]. */
+    data class Tag(
         val id: String,
         val className: String? = null,
         val minHeight: Double? = null,
@@ -78,21 +97,26 @@ data class AppRules(
     val verifiedOn: List<VerifiedOn>,
 ) {
     /** Every view ID a rule of this app names: the only IDs the service ever looks up. */
-    val referencedIds: Set<String> by lazy {
+    val referencedIds: Set<String> by lazy { collect { (it as? Selector.Node)?.id } }
+
+    /** Every screen tag a rule of this app names: the only tags the walk turns into facts. Empty: no walk. */
+    val referencedTags: Set<String> by lazy { collect { (it as? Selector.Tag)?.id } }
+
+    private fun collect(pick: (Selector) -> String?): Set<String> {
         val out = sortedSetOf<String>()
         fun walk(s: Selector) {
             when (s) {
                 is Selector.Any -> s.of.forEach(::walk)
                 is Selector.All -> s.of.forEach(::walk)
                 is Selector.Not -> walk(s.of)
-                is Selector.Node -> out += s.id
+                is Selector.Node, is Selector.Tag -> pick(s)?.let { out += it }
             }
         }
         surfaces.forEach { surface ->
             walk(surface.match)
             surface.exclude.forEach(::walk)
         }
-        out
+        return out
     }
 }
 
@@ -122,8 +146,10 @@ data class ScreenRules(
     }
 
     companion object {
-        const val SCHEMA = 1
+        const val SCHEMA = 2
         private val ID = Regex("^[A-Za-z0-9_]{1,80}$")
+        /** A Compose test tag: a letter first, then letters, digits, underscores or hyphens. */
+        private val TAG = Regex("^[A-Za-z][A-Za-z0-9_-]{0,79}$")
         private val PACKAGE = Regex("^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$")
         private val DATE = Regex("^\\d{4}-\\d{2}-\\d{2}$")
 
@@ -132,7 +158,14 @@ data class ScreenRules(
             is Selector.All -> selector.of.all { matches(it, nodes) }
             is Selector.Not -> !matches(selector.of, nodes)
             is Selector.Node -> nodes.any { n ->
-                n.visible && n.id == selector.id &&
+                n.visible && !n.tag && n.id == selector.id &&
+                    (selector.className == null || n.className == selector.className) &&
+                    (selector.minHeight == null || n.height >= selector.minHeight) &&
+                    (selector.minWidth == null || n.width >= selector.minWidth) &&
+                    (selector.selected == null || n.selected == selector.selected)
+            }
+            is Selector.Tag -> nodes.any { n ->
+                n.visible && n.tag && n.id == selector.id &&
                     (selector.className == null || n.className == selector.className) &&
                     (selector.minHeight == null || n.height >= selector.minHeight) &&
                     (selector.minWidth == null || n.width >= selector.minWidth) &&
@@ -193,7 +226,7 @@ data class ScreenRules(
         }
 
         private fun parseSelector(o: JSONObject): Selector {
-            require(o.length() == 1) { "a selector has exactly one of any, all, not, node" }
+            require(o.length() == 1) { "a selector has exactly one of any, all, not, node, tag" }
             return when (val k = o.keys().next()) {
                 "any" -> Selector.Any(list(o.getJSONArray(k)))
                 "all" -> Selector.All(list(o.getJSONArray(k)))
@@ -203,6 +236,17 @@ data class ScreenRules(
                     keys(n, "node", setOf("id", "class", "minHeight", "minWidth", "selected"), required = setOf("id"))
                     Selector.Node(
                         id = id(n.getString("id")),
+                        className = if (n.has("class")) n.getString("class") else null,
+                        minHeight = if (n.has("minHeight")) fraction(n.getDouble("minHeight")) else null,
+                        minWidth = if (n.has("minWidth")) fraction(n.getDouble("minWidth")) else null,
+                        selected = if (n.has("selected")) n.getBoolean("selected") else null,
+                    )
+                }
+                "tag" -> {
+                    val n = o.getJSONObject(k)
+                    keys(n, "tag", setOf("id", "class", "minHeight", "minWidth", "selected"), required = setOf("id"))
+                    Selector.Tag(
+                        id = tag(n.getString("id")),
                         className = if (n.has("class")) n.getString("class") else null,
                         minHeight = if (n.has("minHeight")) fraction(n.getDouble("minHeight")) else null,
                         minWidth = if (n.has("minWidth")) fraction(n.getDouble("minWidth")) else null,
@@ -220,6 +264,11 @@ data class ScreenRules(
 
         private fun id(s: String): String {
             require(ID.matches(s)) { "not a plain view ID: $s" }
+            return s
+        }
+
+        private fun tag(s: String): String {
+            require(TAG.matches(s)) { "not a plain screen tag: $s" }
             return s
         }
 

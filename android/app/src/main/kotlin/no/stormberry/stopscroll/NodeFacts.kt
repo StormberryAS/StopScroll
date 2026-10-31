@@ -19,7 +19,13 @@ import android.view.accessibility.AccessibilityNodeInfo
  *   3. looks up only the view IDs the rules name, with findAccessibilityNodeInfosByViewId, one call
  *      per ID that returns only matching nodes;
  *   4. turns each into a NodeFact: ID, class, bounds as fractions of the screen, visible, selected.
- *      NodeFact has no text field.
+ *      NodeFact has no text field;
+ *   5. only when the app's rules name a screen tag (X, since 0.0.3): walks down the tree with
+ *      TagWalk, breadth first, fetching each child with getChild(i, 0) (no prefetching) and reading
+ *      only its view ID name, and stops at the end of the first level that holds a bare tag, or at
+ *      TagWalk.MAX_WALK_LEVELS levels or TagWalk.MAX_WALK_NODES nodes. Only a tag the rules name
+ *      becomes a NodeFact (with tag = true, read like step 4); every other tag is dropped after its name
+ *      is compared, and nothing else of it is read.
  * It also makes the one press inside another app the service may make: ACTION_CLICK on the first
  * visible, clickable node under the rule's otherTab parent, at most [TAB_DEPTH] levels down (spec
  * 6.5, step 3; in YouTube the tab Buttons sit one level under a wrapper, in Instagram the tab
@@ -64,8 +70,16 @@ object NodeFacts {
                 facts += fact(node, id, screen)
             }
         }
+        if (app.referencedTags.isNotEmpty()) facts += tagFacts(root, app.referencedTags, screen)
         return Look.Read(Snapshot(pkg, facts))
     }
+
+    /** The screen tags the rules name, found by TagWalk on the first level that holds any tag. */
+    private fun tagFacts(root: AccessibilityNodeInfo, named: Set<String>, screen: Rect): List<NodeFact> =
+        TagWalk.walk(root, { it.childCount }, { n, i -> n.getChild(i, 0) }, { it.viewIdResourceName })
+            .tagged
+            .filter { (_, tag) -> tag in named }
+            .map { (node, tag) -> fact(node, tag, screen, tag = true) }
 
     /** Presses the rule's other tab in [pkg]'s window; false when there is none to press. */
     fun pressOtherTab(service: AccessibilityService, pkg: String, tab: OtherTab): Boolean =
@@ -103,7 +117,7 @@ object NodeFacts {
     /** How far under the otherTab parent the tab may sit. */
     const val TAB_DEPTH = 2
 
-    private fun fact(node: AccessibilityNodeInfo, id: String, screen: Rect): NodeFact {
+    private fun fact(node: AccessibilityNodeInfo, id: String, screen: Rect, tag: Boolean = false): NodeFact {
         val r = Rect()
         node.getBoundsInScreen(r)
         val w = screen.width().toDouble()
@@ -117,6 +131,7 @@ object NodeFacts {
             bottom = ((r.bottom - screen.top) / h).coerceIn(0.0, 1.0),
             visible = node.isVisibleToUser,
             selected = node.isSelected,
+            tag = tag,
         )
     }
 }
