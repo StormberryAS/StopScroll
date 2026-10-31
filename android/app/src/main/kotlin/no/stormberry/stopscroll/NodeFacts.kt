@@ -22,7 +22,8 @@ import android.view.accessibility.AccessibilityNodeInfo
  *      NodeFact has no text field.
  * It also makes the one press inside another app the service may make: ACTION_CLICK on the first
  * visible, clickable node under the rule's otherTab parent, at most [TAB_DEPTH] levels down (spec
- * 6.5, step 3; in YouTube the tab Buttons sit one level under a wrapper). Nothing here is ever logged.
+ * 6.5, step 3; in YouTube the tab Buttons sit one level under a wrapper, in Instagram the tab
+ * FrameLayouts sit directly under tab_bar, feed_tab first). Nothing here is ever logged.
  *
  * THE CACHE. Every lookup makes Android set "this service uses the Accessibility cache", and from
  * then on Android also sends this process screen-change events from EVERY app for that cache, until

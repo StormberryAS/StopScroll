@@ -116,13 +116,13 @@ export interface AppRow {
 }
 
 /**
- * The apps 0.0.1 lists as "Coming soon" (Marcos, 2026-10-29), in his order. They are names on the
- * screen and nothing else: none of them is in the service's packageNames, the <queries> block or the
- * disclosure, so StopScroll receives nothing from them (tests/guards.test.ts pins that). A later
- * release that adds one moves it into rules/screen-rules.json, and the row becomes a real one.
+ * The apps listed as "Coming soon" (Marcos, 2026-10-29), in his order. They are names on the screen
+ * and nothing else: none of them is in the service's packageNames, the <queries> block or the
+ * disclosure, so StopScroll receives nothing from them (tests/release.test.ts pins that). A release
+ * that adds one moves it into rules/screen-rules.json, and the row becomes a real one: 0.0.2 did
+ * that for Instagram (Marcos, 2026-10-30).
  */
 export const COMING_SOON: readonly { readonly key: string; readonly name: string }[] = [
-  { key: 'instagram', name: 'Instagram' },
   { key: 'facebook', name: 'Facebook' },
   { key: 'snapchat', name: 'Snapchat' },
   { key: 'linkedin', name: 'LinkedIn' },
@@ -130,8 +130,8 @@ export const COMING_SOON: readonly { readonly key: string; readonly name: string
 ];
 
 /**
- * The apps the settings list shows: every app the rules cover (YouTube in 0.0.1), then the coming-soon
- * apps the rules do not cover yet, disabled.
+ * The apps the settings list shows: every app the rules cover (YouTube and Instagram since 0.0.2),
+ * then the coming-soon apps the rules do not cover yet, disabled.
  */
 export function appRows(state: State): AppRow[] {
   const rows: AppRow[] = state.apps.map((a) => ({

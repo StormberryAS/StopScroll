@@ -1,24 +1,24 @@
-export const DISCLOSURE_VERSION = 1;
+export const DISCLOSURE_VERSION = 2;
 export const text = {
-    tagline: 'Closes YouTube’s short-video feed and leaves the rest of the app alone. No ads. No internet.',
+    tagline: 'Closes the short-video feeds and leaves the rest of each app alone. No ads. No internet.',
     statusNoConsent: 'StopScroll is not on yet.',
     statusOff: 'You agreed. Now turn StopScroll on in Android’s Accessibility settings.',
     statusAllOff: 'StopScroll is on, but every app is set to Off.',
     statusOn: 'StopScroll is on.',
     introTitle: 'What StopScroll does',
     introBody: [
-        'StopScroll closes the endless short-video feed in the YouTube app and leaves the rest of the app working. When the Shorts player opens, StopScroll presses Back for you. Search, subscriptions and normal videos keep working.',
+        'StopScroll closes the endless short-video feeds in the YouTube and Instagram apps and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.',
         'No ads, no account, no server calls. StopScroll has no internet permission at all, so it never contacts a server, ours or anyone else’s.',
         'StopScroll is not an accessibility tool and not parental control: you can turn it off at any time.',
     ],
-    introNext: 'Coming soon: Instagram, Facebook, Snapchat, LinkedIn and X. StopScroll does not watch them yet.',
+    introNext: 'Coming soon: Facebook, Snapchat, LinkedIn and X. StopScroll does not watch them yet.',
     turnOnButton: 'Turn on blocking',
     disclosureTitle: 'StopScroll needs Accessibility access',
     disclosure: (apps) => [
-        { lead: null, body: 'To find the short-video feed, StopScroll uses Android’s Accessibility Service.' },
+        { lead: null, body: 'To find the short-video feeds, StopScroll uses Android’s Accessibility Service.' },
         {
             lead: 'What it looks at.',
-            body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether the Shorts player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
+            body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether a Shorts or Reels player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
         },
         {
             lead: 'What it does.',
@@ -69,7 +69,7 @@ export const text = {
     turnOffBody: 'StopScroll switches itself off in Android’s settings. You can turn it on again there at any time.',
     turnOff: 'Turn StopScroll off',
     teachTitle: 'Before you turn on Accessibility for any app',
-    teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: one app; only Back, Home and one tab; no internet; its code is open source (MIT).',
+    teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: two apps; only Back, Home and one tab; no internet; its code is open source (MIT).',
     privacyTitle: 'Privacy',
     privacyBody: [
         'StopScroll has no internet permission, so it cannot send anything anywhere itself. It shows no ads and has no account.',
@@ -78,7 +78,7 @@ export const text = {
     ],
     privacyMore: 'More about privacy',
     footerCredits: 'Runs entirely on your device: our own code and the open-source parts listed in NOTICE. Nothing is sent.',
-    footerPermissions: 'Accessibility only, watching one app. No internet. No ads. No tracking.',
+    footerPermissions: 'Accessibility only, watching two apps. No internet. No ads. No tracking.',
     footerOffline: 'Your settings and feed counts stay on this phone, nowhere else. Disconnect and try it.',
     webTitle: 'This is the StopScroll app’s settings screen',
     webBody: 'StopScroll is an Android app. Its settings screen works only inside the app.',

@@ -220,7 +220,7 @@ class MainActivity : ComponentActivity() {
     private fun openLink(id: String): Boolean {
         val rules = Rules.load(this)
         val url = if (id == LinkList.EMAIL_ID) {
-            LinkList.email(appVersion(), appVersionCode(), packageName, Build.VERSION.RELEASE, installedVersion(rules.packages.first()))
+            LinkList.email(appVersion(), appVersionCode(), packageName, Build.VERSION.RELEASE, rules.apps.map { it.name to installedVersion(it.packageName) })
         } else {
             LinkList.LINKS[id] ?: return false
         }

@@ -3,15 +3,18 @@
 // Texts taken from the spec (section 12) say "spec 12.x"; texts changed for the 0.0.1 scope (YouTube
 // only, no minutes per day, no once-a-second check) or written new say "NEW". The 0.0.1 release
 // kit (29 October 2026) added the coming-soon list (Marcos: "Release StopScroll as v 0.0.1 with
-// youtube only, and add Instagram/Facebook/Snapchat/Linkedin/X coming soon").
+// youtube only, and add Instagram/Facebook/Snapchat/Linkedin/X coming soon"). 0.0.2 (30 October 2026)
+// watches Instagram too (Marcos: "include Instagram on StopScroll"); every text it changed says
+// "0.0.2" and was approved by Marcos on 30 October 2026 ("Everything is approved for StopScroll").
 // tests/copy.test.ts checks the house style of every string here.
 
 /** Bump when the disclosure's meaning changes: a consent counts only for the version it was given to. Equals Consent.DISCLOSURE_VERSION in Kotlin. */
-export const DISCLOSURE_VERSION = 1;
+export const DISCLOSURE_VERSION = 2;
 
 export const text = {
-  // App top (spec 12.6 hero line, also the Labs app-top tagline), singular while YouTube is the only app watched.
-  tagline: 'Closes YouTube’s short-video feed and leaves the rest of the app alone. No ads. No internet.',
+  // App top (spec 12.6 hero line, also the Labs app-top tagline). 0.0.2, approved 2026-10-30: the spec's plural
+  // hero line, now that two apps are watched.
+  tagline: 'Closes the short-video feeds and leaves the rest of each app alone. No ads. No internet.',
 
   // Status line. NEW.
   statusNoConsent: 'StopScroll is not on yet.',
@@ -19,26 +22,29 @@ export const text = {
   statusAllOff: 'StopScroll is on, but every app is set to Off.',
   statusOn: 'StopScroll is on.',
 
-  // Intro (explainer, spec 6.7 step 1). From spec 12.1, narrowed to YouTube. NEW where it differs.
+  // Intro (explainer, spec 6.7 step 1). From spec 12.1, narrowed to YouTube and Instagram. The first
+  // paragraph is 0.0.2, approved 2026-10-30 (DM-1 at its default: a Reel sent in a message is closed too).
   introTitle: 'What StopScroll does',
   introBody: [
-    'StopScroll closes the endless short-video feed in the YouTube app and leaves the rest of the app working. When the Shorts player opens, StopScroll presses Back for you. Search, subscriptions and normal videos keep working.',
+    'StopScroll closes the endless short-video feeds in the YouTube and Instagram apps and leaves the rest of each app working. When the Shorts or Reels player opens, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. A Reel someone sends you in a message is closed too.',
     'No ads, no account, no server calls. StopScroll has no internet permission at all, so it never contacts a server, ours or anyone else’s.',
     'StopScroll is not an accessibility tool and not parental control: you can turn it off at any time.',
   ],
-  // 0.0.1 kit, NEW.
-  introNext: 'Coming soon: Instagram, Facebook, Snapchat, LinkedIn and X. StopScroll does not watch them yet.',
+  // 0.0.1 kit; 0.0.2, approved 2026-10-30: Instagram left the list.
+  introNext: 'Coming soon: Facebook, Snapchat, LinkedIn and X. StopScroll does not watch them yet.',
   turnOnButton: 'Turn on blocking',
 
   // The prominent disclosure (spec 12.3), for the apps this build watches. Changed for stage 1 part
   // one: no Facebook sentence (FB-1 is stage 2), "What it keeps" without minutes per day (no time
   // accounting yet), and "Other apps" says what this build really does (no once-a-second check).
+  // 0.0.2, approved 2026-10-30 (DISCLOSURE_VERSION 2): "feeds" and "a Shorts or Reels player", spec 12.3's own
+  // words; the apps come from the build's list ("the YouTube or Instagram app").
   disclosureTitle: 'StopScroll needs Accessibility access',
   disclosure: (apps: string): { lead: string | null; body: string }[] => [
-    { lead: null, body: 'To find the short-video feed, StopScroll uses Android’s Accessibility Service.' },
+    { lead: null, body: 'To find the short-video feeds, StopScroll uses Android’s Accessibility Service.' },
     {
       lead: 'What it looks at.',
-      body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether the Shorts player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
+      body: `Only while you are in ${apps}. It reads the names and positions of the parts of the screen to see whether a Shorts or Reels player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type.`,
     },
     {
       lead: 'What it does.',
@@ -88,7 +94,8 @@ export const text = {
   appInstalled: (name: string, version: string | null): string => (version ? `${name} ${version} is installed.` : `${name} is installed.`),
   appNotInstalled: (name: string): string => `${name} is not installed on this phone, so there is nothing to close.`,
   // The coming-soon rows (0.0.1 kit, NEW). These apps are listed only: they are not in the
-  // service's packageNames, so StopScroll receives nothing from them until a release adds them.
+  // service's packageNames, so StopScroll receives nothing from them until a release adds them
+  // (0.0.2 added Instagram; Facebook, Snapchat, LinkedIn and X remain).
   comingSoonLabel: 'Coming soon',
   comingSoonNote: 'StopScroll does not watch these apps yet. Each one comes in a later release, once its screens have been checked on a phone.',
 
@@ -106,9 +113,9 @@ export const text = {
   turnOffBody: 'StopScroll switches itself off in Android’s settings. You can turn it on again there at any time.',
   turnOff: 'Turn StopScroll off',
 
-  // Teaching panel (spec 12.4), narrowed to this build: one app, code to be published. NEW where it differs.
+  // Teaching panel (spec 12.4), narrowed to this build. NEW where it differs; "two apps" is 0.0.2, approved 2026-10-30.
   teachTitle: 'Before you turn on Accessibility for any app',
-  teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: one app; only Back, Home and one tab; no internet; its code is open source (MIT).',
+  teachBody: 'Accessibility lets an app see and press things on your screen. Before you allow it, check four things: which apps it watches, what it can press, whether it has internet access, and whether you can read its code. StopScroll: two apps; only Back, Home and one tab; no internet; its code is open source (MIT).',
 
   // Privacy notes (spec 8 and 6.1). NEW.
   privacyTitle: 'Privacy',
@@ -119,9 +126,9 @@ export const text = {
   ],
   privacyMore: 'More about privacy',
 
-  // Footer (spec 12.2).
+  // Footer (spec 12.2). footerPermissions "two apps" is 0.0.2, approved 2026-10-30 (index.html and privacy.html carry the same line).
   footerCredits: 'Runs entirely on your device: our own code and the open-source parts listed in NOTICE. Nothing is sent.',
-  footerPermissions: 'Accessibility only, watching one app. No internet. No ads. No tracking.',
+  footerPermissions: 'Accessibility only, watching two apps. No internet. No ads. No tracking.',
   footerOffline: 'Your settings and feed counts stay on this phone, nowhere else. Disconnect and try it.',
 
   // Website, where the page runs without the app (stage 4 writes the real website). NEW.

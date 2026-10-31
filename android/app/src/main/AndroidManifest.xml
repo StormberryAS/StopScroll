@@ -26,10 +26,11 @@
         android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         tools:node="remove" />
 
-    <!-- The installed version of the watched app, for the health line (spec 6.8). One package,
-         no QUERY_ALL_PACKAGES. -->
+    <!-- The installed versions of the watched apps, for the health line and the report email (spec
+         6.8). Exactly the packages of rules/screen-rules.json, no QUERY_ALL_PACKAGES. -->
     <queries>
         <package android:name="com.google.android.youtube" />
+        <package android:name="com.instagram.android" />
     </queries>
 
     <!-- NO BACKUP: allowBackup false, and both rule files exclude everything as well, because
@@ -68,8 +69,8 @@
 
         <!--
           The Accessibility Service (spec 6.1). Exported so the system can bind it, and protected by
-          BIND_ACCESSIBILITY_SERVICE, which only the system holds. Its configuration, with the one
-          watched package, is res/xml/accessibility_service_config.xml.
+          BIND_ACCESSIBILITY_SERVICE, which only the system holds. Its configuration, with the
+          watched packages, is res/xml/accessibility_service_config.xml.
         -->
         <service
             android:name=".FeedService"

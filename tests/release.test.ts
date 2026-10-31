@@ -21,13 +21,14 @@ const versionName = /^\s*versionName = "([^"]+)"$/m.exec(gradle)?.[1];
 /** A store text without its DRAFT line (the line goes when Marcos approves the text). */
 const store = (f: string): string => read(`${FASTLANE}/${f}`).replace(DRAFT, '').replace(/\n$/, '');
 
-test('version 0.0.1, versionCode 1, below the Play offset; Play is 1000 plus it', () => {
-  assert.equal(versionName, '0.0.1');
-  assert.equal(versionCode, 1);
+test('version 0.0.2, versionCode 2, below the Play offset; Play is 1000 plus it', () => {
+  assert.equal(versionName, '0.0.2');
+  assert.equal(versionCode, 2);
   assert.ok(versionCode < 1000);
   assert.match(gradle, /val PLAY_VERSION_CODE_OFFSET = 1000\n/);
   assert.match(gradle, /applicationId = if \(playBuild\) "no\.stormberry\.stopscroll\.play" else "no\.stormberry\.stopscroll"/);
   assert.match(read('README.md'), /\| `android-v0\.0\.1` \| 1 \| 0\.0\.1 \| 1001 \|/);
+  assert.match(read('README.md'), /\| `android-v0\.0\.2` \| 2 \| 0\.0\.2 \| 1002 \|/);
 });
 
 test('the workflow bundles exactly the build\'s include list, plus the bridge script', () => {
@@ -97,14 +98,27 @@ test('store texts: within the limits, no dashes, the title is the name alone', (
   assert.doesNotMatch(all, /reproducible/i, 'not claimed before a release matched');
 });
 
+const WATCHED = ['com.google.android.youtube', 'com.instagram.android'];
+
+test('the watched list is exactly YouTube and Instagram, everywhere: service, queries, rules and the release check', () => {
+  const svc = read('android/app/src/main/res/xml/accessibility_service_config.xml').replace(/<!--[\s\S]*?-->/g, '');
+  const manifest = read('android/app/src/main/AndroidManifest.xml').replace(/<!--[\s\S]*?-->/g, '');
+  const rules = JSON.parse(read('rules/screen-rules.json')) as { apps: { package: string }[] };
+  assert.deepEqual(/android:packageNames="([^"]+)"/.exec(svc)?.[1]?.split(','), WATCHED);
+  assert.deepEqual([...manifest.matchAll(/<package android:name="([^"]+)"/g)].map((m) => m[1]), WATCHED);
+  assert.deepEqual(rules.apps.map((a) => a.package), WATCHED);
+  assert.match(workflow, new RegExp(`\\n {10}PINNED_APPS=${WATCHED.join(',').replace(/\./g, '\\.')}\\n`));
+  assert.match(workflow, /\[ "\$WANT" = "\$PINNED_APPS" \] \|\| \{ echo "::error::the rules cover/);
+  assert.match(workflow, /\[ -n "\$GOT" \] && \[ "\$GOT" = "\$WANT" \] \|\|/);
+});
+
 test('the coming-soon apps are names on the screen only: never watched, never queried, never in the rules', () => {
   const svc = read('android/app/src/main/res/xml/accessibility_service_config.xml');
   const manifest = read('android/app/src/main/AndroidManifest.xml').replace(/<!--[\s\S]*?-->/g, '');
   const rules = read('rules/screen-rules.json');
-  for (const pkg of ['com.instagram.android', 'com.facebook.katana', 'com.snapchat.android', 'com.linkedin.android', 'com.twitter.android']) {
+  for (const pkg of ['com.facebook.katana', 'com.snapchat.android', 'com.linkedin.android', 'com.twitter.android']) {
     assert.ok(!svc.includes(pkg) && !manifest.includes(pkg) && !rules.includes(pkg), `${pkg} is not watched`);
   }
-  assert.deepEqual([...manifest.matchAll(/<package android:name="([^"]+)"/g)].map((m) => m[1]), ['com.google.android.youtube']);
 });
 
 test('the shared disclaimer is present and linked from both pages, and nothing names a private device', () => {

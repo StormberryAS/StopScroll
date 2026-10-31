@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- User-visible texts on the Android side. Approved by Marcos on 29 October 2026 (COPY-1), adapted to the
-     stage 1 part one scope (YouTube only) from spec 12.4. British English, no em dashes. -->
+     stage 1 part one scope (YouTube only) from spec 12.4. 0.0.2 (30 October 2026) adds Instagram:
+     service_description is spec 12.4's stage 1 wording, approved by Marcos on 30 October 2026. British English, no em dashes. -->
 <resources>
     <string name="app_name">StopScroll</string>
-    <!-- Android's own Accessibility settings page shows this. Spec 12.4, narrowed to YouTube. -->
-    <string name="service_description">Closes the short-video feed in YouTube. Watches only that one app. No internet access.</string>
-    <!-- %1$s is the feed name from the rules, for example YouTube Shorts. -->
+    <!-- Android's own Accessibility settings page shows this. Spec 12.4, stage 1 (YouTube and Instagram). -->
+    <string name="service_description">Closes the short-video feeds in YouTube and Instagram. Watches only those two apps. No internet access.</string>
+    <!-- %1$s is the feed name from the rules, for example YouTube Shorts or Instagram Reels. -->
     <string name="toast_closed">StopScroll closed %1$s</string>
-    <!-- %1$s is the app name, for example YouTube. -->
+    <!-- %1$s is the app name, for example YouTube or Instagram. -->
     <string name="toast_paused">StopScroll paused for 30 seconds in %1$s. If this keeps happening, please tell us.</string>
     <string name="webview_too_old">This phone\'s WebView is too old for StopScroll\'s settings screen. Update Android System WebView and open StopScroll again.</string>
     <string name="no_app_for_link">No app on this phone can open that.</string>

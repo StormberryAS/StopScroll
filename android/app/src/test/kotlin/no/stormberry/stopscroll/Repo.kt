@@ -52,6 +52,20 @@ class Fixture(val rel: String) {
         }
     }
 
+    /** The resource IDs (without the package) of the direct children of the first node with [id], in order. */
+    fun childIds(id: String): List<String> {
+        fun find(e: Element): Element? {
+            if (e.tagName == "node" && e.getAttribute("resource-id") == "$app:id/$id") return e
+            val kids = e.childNodes
+            for (i in 0 until kids.length) (kids.item(i) as? Element)?.let(::find)?.let { return it }
+            return null
+        }
+        val parent = find(doc) ?: return emptyList()
+        return (0 until parent.childNodes.length).mapNotNull { parent.childNodes.item(it) as? Element }
+            .filter { it.tagName == "node" }
+            .map { it.getAttribute("resource-id").removePrefix("$app:id/") }
+    }
+
     /** How many levels under the node with [id] the first node of [className] sits, or null. */
     fun depthOfFirst(id: String, className: String): Int? {
         fun find(e: Element): Element? {

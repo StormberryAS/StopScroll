@@ -4,7 +4,7 @@ name: Android release
 # itself from EclipseTracker's (released 2.0.0 on 17 October 2026 with it) and CheckLink's (0.0.1 on
 # 15 October 2026): the same two jobs, the same pinned actions, the same order of checks. What
 # differs: no permission at all (expected-permissions.txt holds only the package line), the watched
-# app list (YouTube only, read from the APK's own service configuration), this app's file list
+# app list (YouTube and Instagram since 0.0.2, read from the APK's own service configuration), this app's file list
 # (WebAssets.INCLUDES in android/app/build.gradle.kts; tests/release.test.ts keeps the two equal),
 # its licences, the rules file, its file name stopscroll-v<version>.apk, and its pinned certificate.
 #
@@ -75,8 +75,9 @@ jobs:
           persist-credentials: false
 
       # The store texts (fastlane/ and zapstore.yaml), README.md, CHANGELOG.md and the in-app texts
-      # (ts/core/copy.ts and strings.xml, whose markers also cover privacy.html and the DISCLAIMER
-      # section) were written as DRAFTs on 29 October 2026, each marked by a line that says so. zsp
+      # (ts/core/copy.ts and strings.xml, whose markers also cover privacy.html, index.html, the
+      # DISCLAIMER section and the report email) are written as DRAFTs (29 October 2026 for 0.0.1,
+      # 30 October 2026 for 0.0.2), each marked by a line that says so. zsp
       # publishes the store texts as they are, so no release may be built while one still carries
       # that line: Marcos approves the texts and the line is removed.
       - name: Refuse to release while a text is marked DRAFT
@@ -262,14 +263,18 @@ jobs:
           echo "Verified: package, tag and versionName agree; the release note for versionCode $VERSION_CODE exists."
 
           # THE WATCHED APPS. The Accessibility Service's configuration inside the APK must name
-          # exactly the packages of rules/screen-rules.json (YouTube only in 0.0.1), with
-          # notificationTimeout 0 and isAccessibilityTool false. The coming-soon apps in the app's list
-          # are names on the screen only and must never reach this list.
+          # exactly YouTube and Instagram (0.0.2), in that order, and exactly the packages of
+          # rules/screen-rules.json, with notificationTimeout 0 and isAccessibilityTool false. The
+          # pinned list below changes only by hand, with a new disclosure and a new Play declaration
+          # (spec 9.1); a rules file that names one more app fails here as well. The coming-soon apps
+          # in the app's list are names on the screen only and must never reach this list.
           SVC=$("$AAPT" dump resources "$APK" | grep -A2 'xml/accessibility_service_config$' | sed -n 's#.*(file) \(res/[^ ]*\.xml\) type=XML.*#\1#p' | head -1)
           [ -n "$SVC" ] || { echo "::error::cannot find the service configuration in the APK"; exit 1; }
           XML=$("$AAPT" dump xmltree --file "$SVC" "$APK")
           GOT=$(printf '%s\n' "$XML" | sed -n 's/.*packageNames.*="\([^"]*\)".*/\1/p' | head -1)
+          PINNED_APPS=com.google.android.youtube,com.instagram.android
           WANT=$(python3 -I -c 'import json,sys; print(",".join(a["package"] for a in json.load(open(sys.argv[1]))["apps"]))' ../rules/screen-rules.json)
+          [ "$WANT" = "$PINNED_APPS" ] || { echo "::error::the rules cover '$WANT', not exactly '$PINNED_APPS'"; exit 1; }
           [ -n "$GOT" ] && [ "$GOT" = "$WANT" ] || { echo "::error::the service watches '$GOT', not exactly the rules' '$WANT'"; exit 1; }
           printf '%s\n' "$XML" | grep -q 'notificationTimeout.*=0$' || { echo "::error::notificationTimeout is not 0"; exit 1; }
           printf '%s\n' "$XML" | grep -q 'isAccessibilityTool.*=false$' || { echo "::error::isAccessibilityTool is not false"; exit 1; }
@@ -429,7 +434,7 @@ jobs:
           PY
 
       # Lets anyone prove this exact binary came out of this repository and this run:
-      #   gh attestation verify stopscroll-v0.0.1.apk -R StormberryAS/StopScroll
+      #   gh attestation verify stopscroll-v0.0.2.apk -R StormberryAS/StopScroll
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: ${{ runner.temp }}/stopscroll-release.apk

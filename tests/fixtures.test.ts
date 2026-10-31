@@ -8,11 +8,19 @@ const fixtures = walk('tests/fixtures').filter((p) => p.endsWith('.xml'));
 const ALLOWED = new Set(['class', 'resource-id', 'bounds', 'selected']);
 const FIXTURE_ATTRS = new Set(['app', 'label', 'expect', 'captured', 'device', 'android', 'source']);
 
-test('there are fixtures: four Shorts, two normal videos, Home and a transition', () => {
-  assert.equal(fixtures.length, 8);
-  const expects = fixtures.map((p) => /expect="(\w+)"/.exec(read(p))?.[1]);
-  assert.equal(expects.filter((e) => e === 'block').length, 4);
-  assert.equal(expects.filter((e) => e === 'allow').length, 4);
+test('there are fixtures: YouTube (four Shorts, two normal videos, Home, a transition) and Instagram (7 Reels, 11 other screens)', () => {
+  assert.equal(fixtures.length, 26);
+  const count = (dir: string, expect: string): number =>
+    fixtures.filter((p) => p.startsWith(`tests/fixtures/${dir}/`) && new RegExp(`expect="${expect}"`).test(read(p))).length;
+  assert.equal(count('youtube', 'block'), 4);
+  assert.equal(count('youtube', 'allow'), 4);
+  assert.equal(count('instagram', 'block'), 7);
+  assert.equal(count('instagram', 'allow'), 11);
+  // Each fixture sits in the folder of its app, so the Kotlin tests read it with that app's rules.
+  for (const p of fixtures) {
+    const app = /<fixture app="([^"]+)"/.exec(read(p))?.[1];
+    assert.equal(app, p.startsWith('tests/fixtures/youtube/') ? 'com.google.android.youtube' : 'com.instagram.android', p);
+  }
 });
 
 for (const path of fixtures) {

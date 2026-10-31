@@ -1,1 +1,1 @@
-Closes YouTube's short-video feed and keeps the rest. No ads. No internet.
+Closes the short-video feeds, keeps the rest of each app. No ads. No internet.

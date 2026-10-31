@@ -54,6 +54,23 @@ class ServiceConfigTest {
         }
     }
 
+    @Test fun youTubeAndInstagramEachFollowTheirOwnMode() {
+        val ig = "com.instagram.android"
+        val both = listOf(yt, ig)
+        assertEquals(both, Repo.rules.packages)
+        assertEquals(both, ServiceConfig.plan(both, mapOf(yt to Mode.ALWAYS, ig to Mode.ALWAYS), true).packages)
+        val igOff = ServiceConfig.plan(both, mapOf(yt to Mode.ALWAYS, ig to Mode.OFF), true)
+        assertEquals(listOf(yt), igOff.packages)
+        assertFalse(ServiceConfig.mayRead(igOff, ig))
+        val ytOff = ServiceConfig.plan(both, mapOf(yt to Mode.OFF, ig to Mode.ALWAYS), true)
+        assertEquals(listOf(ig), ytOff.packages)
+        assertTrue(ServiceConfig.mayRead(ytOff, ig))
+        // Instagram is Always block until the user chooses (spec 6.6), and inert until consent.
+        val fresh = SettingsModel()
+        assertEquals(Mode.ALWAYS, fresh.mode(ig))
+        assertEquals(both, ServiceConfig.plan(both, fresh.modesFor(both), true).packages)
+    }
+
     @Test fun anEmptyWatchedListIsRefused() {
         assertThrows(IllegalArgumentException::class.java) { ServiceConfig.plan(emptyList(), emptyMap(), true) }
     }

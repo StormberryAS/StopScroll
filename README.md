@@ -1,28 +1,31 @@
 # StopScroll
 
-Closes YouTube's short-video feed and leaves the rest of the app alone. No ads. No internet.
+Closes the short-video feeds and leaves the rest of each app alone. No ads. No internet.
 
-StopScroll is an Android app. When the Shorts player opens in the YouTube app, StopScroll presses Back for you. Search, subscriptions and normal videos keep working. It has no internet permission and no other permission at all, it shows no ads, and it needs no account.
+StopScroll is an Android app. When the Shorts or Reels player opens in the YouTube or Instagram app, StopScroll presses Back for you. Search, subscriptions, normal videos, Stories, messages and profiles keep working. It has no internet permission and no other permission at all, it shows no ads, and it needs no account.
 
 A functioning prototype from [Stormberry AS](https://stormberry.as), Norway. Not affiliated with or endorsed by Google, YouTube, Meta, Snap, LinkedIn or X.
 
 ## What it does
 
 - **Closes YouTube Shorts.** When the Shorts player opens (from the Shorts tab, a Short on Home, in search or on a channel), StopScroll presses Back, twice if needed. If that does not leave the feed, it presses one tab in the same app, then Home. It presses nothing else.
+- **Closes Instagram Reels** (since 0.0.2). The Reels tab, and a Reel opened from the home feed, from Explore, from a profile's Reels tab or from a message: a Reel someone sends you is closed too. Stories, the home feed, messages, profiles and search stay open, and so does a photo or a carousel post opened from Explore, which Instagram shows in the same viewer as Reels. The same steps as in YouTube; the tab it presses is Instagram's home feed tab (`feed_tab`, where the tab bar shows; elsewhere Home).
 - **Per app, you choose:** Off or Always block. Off is one tap away, and "Turn StopScroll off" switches the service off in Android's settings.
 - **Asks first.** Before Android's Accessibility settings open, the app shows what the service looks at, what it does and what it keeps, and waits for "I agree". A service turned on without that agreement does nothing.
 - **A loop guard.** If the feed is still there after two full attempts within 10 seconds, StopScroll leaves the app alone for 30 seconds and counts a pause.
 
-### Why only YouTube today
+### Why YouTube and Instagram, and not the others yet
 
-StopScroll recognises a feed by the names an app gives the parts of its screen, checked on a real phone and kept in `rules/screen-rules.json` with sanitised test captures in `tests/fixtures/`. YouTube's Shorts player has been checked; the other apps have not yet. Instagram, Facebook, Snapchat, LinkedIn and X appear in the app as **coming soon**: they are names on the screen and nothing more. They are not in the service's app list (`android:packageNames` in `android/app/src/main/res/xml/accessibility_service_config.xml`), so Android delivers StopScroll's code nothing from them, and the disclosure names YouTube only. Each one is added in a later release, together with its rules, its captures and a new disclosure that asks for agreement again.
+StopScroll recognises a feed by the names an app gives the parts of its screen, checked on a real phone and kept in `rules/screen-rules.json` with sanitised test captures in `tests/fixtures/`. YouTube's Shorts player (0.0.1) and Instagram's Reels viewer (0.0.2) have been checked; the other apps have not yet. Facebook, Snapchat, LinkedIn and X appear in the app as **coming soon**: they are names on the screen and nothing more. They are not in the service's app list (`android:packageNames` in `android/app/src/main/res/xml/accessibility_service_config.xml`), so Android delivers StopScroll's code nothing from them, and the disclosure names YouTube and Instagram only. Each one is added in a later release, together with its rules, its captures and a new disclosure that asks for agreement again, as Instagram was: after the update to 0.0.2, StopScroll does nothing until you open it and agree to the new disclosure.
+
+In Instagram's own code "reel" means a Story, so the Instagram rule names no `reel_` view at all: it needs Instagram's short-video pager (`clips_viewer_view_pager`, at least 60% of the screen high) holding a single video, or the Reels tab selected, and the Stories viewer and every chat screen are listed as exclusions that always win.
 
 ## Privacy
 
 - **No internet permission.** StopScroll cannot contact a server itself, ours or anyone else's. Links in the app open in your browser or mail app, and only from a fixed list compiled into the app.
 - **No ads, no account, no analytics, no logs.**
-- **What it looks at.** Only while you are in the YouTube app, it reads the names and positions of the parts of the screen to see whether the Shorts player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type. One file, `NodeFacts.kt`, touches another app's screen, and its node type has no text field; `tests/guards.test.ts` fails the build if any code reads screen text.
-- **Other apps.** Each time it checks the screen, it first reads which app is in front; if that is not YouTube, it stops there and reads nothing else.
+- **What it looks at.** Only while you are in the YouTube or Instagram app, it reads the names and positions of the parts of the screen to see whether a Shorts or Reels player is open. It does not read the words on your screen: not your messages, captions, passwords or anything you type. One file, `NodeFacts.kt`, touches another app's screen, and its node type has no text field; `tests/guards.test.ts` fails the build if any code reads screen text.
+- **Other apps.** Each time it checks the screen, it first reads which app is in front; if that is not YouTube or Instagram, it stops there and reads nothing else.
 - **What it keeps, on the phone only:** your settings, the date you agreed to the disclosure, and per app the number of feeds closed, the number of pauses and the date it last closed a feed. Backups and phone-to-phone transfers leave them out (`allowBackup="false"` and both data-extraction rule files exclude everything).
 - **What Android does on its own.** While an Accessibility service looks at a screen, Android's own code inside the app can also receive notices of screen changes in other apps, for a cache Android keeps. StopScroll turns that cache off straight after each check (`setCacheEnabled(false)`), so this lasts only for the check and never happens while StopScroll is off. StopScroll's code never sees these notices.
 - **The honest limit.** On Android, an app update can add the internet permission without asking you. So the promise rests on this open code and on the permission check every release runs, not on Android asking again.
@@ -40,14 +43,14 @@ The only line you should see is the package name, `package: no.stormberry.stopsc
 ## Verify a release
 
 ```bash
-sha256sum -c stopscroll-v0.0.1.apk.sha256
-apksigner verify --print-certs stopscroll-v0.0.1.apk
-gh attestation verify stopscroll-v0.0.1.apk -R StormberryAS/StopScroll
+sha256sum -c stopscroll-v0.0.2.apk.sha256
+apksigner verify --print-certs stopscroll-v0.0.2.apk
+gh attestation verify stopscroll-v0.0.2.apk -R StormberryAS/StopScroll
 ```
 
 **Signing certificate SHA-256:** `1e4aa9ee4d927009dbe8ba17cfd05f496213e6001adf79afdb2d5b90dbc5591a`
 
-The release workflow (`.github/workflows/android-release.yml`, started by `android-v*` tags only) builds the APK unsigned in a job that holds no key. A second job, which runs no Gradle, checks that APK before the key is decoded: no permission but the package line, not debuggable, the version the tag names, every bundled page and file byte for byte the tagged commit's, and the licence texts. Only then does it align the APK and sign it with apksigner, and it refuses to publish unless there is exactly one signer, with the certificate above. Each release also waits for an approval on GitHub before the key is used.
+The release workflow (`.github/workflows/android-release.yml`, started by `android-v*` tags only) builds the APK unsigned in a job that holds no key. A second job, which runs no Gradle, checks that APK before the key is decoded: no permission but the package line, not debuggable, the version the tag names, the watched apps (exactly YouTube and Instagram), every bundled page and file byte for byte the tagged commit's, and the licence texts. Only then does it align the APK and sign it with apksigner, and it refuses to publish unless there is exactly one signer, with the certificate above. Each release also waits for an approval on GitHub before the key is used.
 
 ## Reproducible build
 
@@ -55,7 +58,7 @@ The same commit gives the same unsigned APK, byte for byte, in two clean builds 
 
 ```bash
 git clone https://github.com/StormberryAS/StopScroll.git
-cd StopScroll && git checkout android-v0.0.1
+cd StopScroll && git checkout android-v0.0.2
 cd android && ./gradlew --no-daemon --no-build-cache --no-configuration-cache -PunsignedRelease=true :app:assembleRelease
 BT="$ANDROID_HOME/build-tools/36.0.0"
 "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
@@ -64,7 +67,7 @@ keytool -genkeypair -keystore mine.p12 -storetype PKCS12 -alias mine -keyalg RSA
   --v1-signing-enabled false --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled false \
   --out mine.apk aligned.apk
 cd .. && python3 android/tools/apk-without-signature.py android/mine.apk
-python3 android/tools/apk-without-signature.py /path/to/stopscroll-v0.0.1.apk
+python3 android/tools/apk-without-signature.py /path/to/stopscroll-v0.0.2.apk
 ```
 
 The two lines must show the same SHA-256. Use JDK 21 (the workflow uses Temurin 21) and a 4096-bit key as above, the size of the release key, so the signing block takes the same room.
@@ -113,6 +116,7 @@ The build refuses a release bundle without `-PplayBuild=true` or without a compl
 | Release tag | versionCode | Play versionName | Play versionCode |
 |-|-|-|-|
 | `android-v0.0.1` | 1 | 0.0.1 | 1001 |
+| `android-v0.0.2` | 2 | 0.0.2 | 1002 |
 
 ## Licence and disclaimer
 

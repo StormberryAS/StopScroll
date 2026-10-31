@@ -4,7 +4,7 @@ package no.stormberry.stopscroll
  * THE FIXED LINK LIST (spec 5, 6.8): every address the app can hand to another app. The page passes
  * only an ID (openLink), or taps an anchor whose address is exactly one of these; nothing else
  * opens. The email link is built here, in Kotlin, with the app's version, versionCode and package
- * name (read at run time), the Android release and the watched app's version, and no screen content;
+ * name (read at run time), the Android release and each watched app's version, and no screen content;
  * the user's own mail app sends it, if the user chooses.
  */
 object LinkList {
@@ -35,9 +35,11 @@ object LinkList {
      * The "Did StopScroll miss a feed? Or did it block a normal video? Email us!" email (Marcos,
      * 2026-10-29): two empty lines for the user, then versions and the package name only, never
      * screen content. [packageName] is the running app's own (Context.packageName), so the Play
-     * edition reports no.stormberry.stopscroll.play; it is never written here.
+     * edition reports no.stormberry.stopscroll.play; it is never written here. [apps] is each watched
+     * app's name and installed version (null: not installed), in the rules' order: one line each
+     * (0.0.2: YouTube and Instagram, approved 30 October 2026; 0.0.1 had the one YouTube line).
      */
-    fun email(versionName: String, versionCode: Long, packageName: String, androidRelease: String, youtubeVersion: String?): String {
+    fun email(versionName: String, versionCode: Long, packageName: String, androidRelease: String, apps: List<Pair<String, String?>>): String {
         val subject = "StopScroll $versionName: missed a feed or blocked a normal video"
         val body = listOf(
             "Which app:",
@@ -46,9 +48,8 @@ object LinkList {
             "StopScroll $versionName ($versionCode)",
             packageName,
             "Android $androidRelease",
-            "YouTube ${youtubeVersion ?: "not installed"}",
-        ).joinToString("\n")
-        return "mailto:$EMAIL_TO?subject=${enc(subject)}&body=${enc(body)}"
+        ) + apps.map { (name, version) -> "$name ${version ?: "not installed"}" }
+        return "mailto:$EMAIL_TO?subject=${enc(subject)}&body=${enc(body.joinToString("\n"))}"
     }
 
     private fun enc(s: String): String = java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20")

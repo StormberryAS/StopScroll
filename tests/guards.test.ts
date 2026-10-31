@@ -44,16 +44,37 @@ test('the text guard catches every spelling it is meant to catch', () => {
     assert.match(code, bannedText, `the guard misses ${sample}`);
   }
   for (const sample of ['"$node"', '"${event.packageName}"', 'node.toString()', '"$root"']) assert.match(sample, printsNode, `the guard misses ${sample}`);
-  for (const fine of ['Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT)', 'private fun toast(text: String)', 'context', 'error("bad")']) {
+  for (const fine of [
+    'Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT)', 'private fun toast(text: String)', 'context', 'error("bad")',
+    'label.setTextSize(TypedValue.COMPLEX_UNIT_SP, NoticeStyle.TEXT_SP)', 'label.setTextColor(palette.textColour)',
+  ]) {
     assert.doesNotMatch(fine, bannedText, `false alarm on ${fine}`);
   }
 });
 
 test('no screen-text API anywhere in the Kotlin code (stage 1 reads no text at all)', () => {
-  assert.deepEqual(only(bannedText), []);
+  // NoticeWindow.kt is pinned on its own below: it writes StopScroll's own message and reads nothing.
+  assert.deepEqual(only(bannedText).filter((f) => f !== 'NoticeWindow.kt'), []);
   for (const f of kotlin.filter((k) => /\/(?:NodeFacts|FeedService)\.kt$/.test(k.path))) {
     assert.doesNotMatch(f.code.replace(ALLOWED_TO_STRING, ''), printsNode, `${f.path}: prints a node or an event`);
   }
+});
+
+// The on-screen message (decision D2, 30 October 2026; it replaced the Toast, which Android drops for an
+// app without notifications). NoticeWindow.kt is the one file that puts words on the screen: it may assign
+// text to its own view and nothing else, it never sees another app's screen, and its window is an
+// Accessibility overlay (no permission) that can never take the focus or a tap.
+test('the on-screen message writes its own words, reads none, and can never take a tap', () => {
+  const nw = kotlin.find((f) => f.path.endsWith('/NoticeWindow.kt'))?.code ?? '';
+  assert.ok(nw.length > 0, 'NoticeWindow.kt is there');
+  const hits = [...nw.matchAll(new RegExp(bannedText.source, 'gi'))].map((m) => nw.slice(m.index).split('\n')[0]);
+  assert.deepEqual(hits, ['.text = message'], 'the only text API is the assignment of its own message');
+  assert.doesNotMatch(nw, /AccessibilityEvent|AccessibilityNodeInfo|AccessibilityRecord|announceForAccessibility|sendAccessibilityEvent/);
+  assert.match(nw, /WindowManager\.LayoutParams\.TYPE_ACCESSIBILITY_OVERLAY,/);
+  assert.deepEqual([...nw.matchAll(/LayoutParams\.FLAG_[A-Z_]+/g)].map((m) => m[0]), ['LayoutParams.FLAG_NOT_FOCUSABLE', 'LayoutParams.FLAG_NOT_TOUCHABLE']);
+  assert.deepEqual(only(/WindowManager|TYPE_ACCESSIBILITY_OVERLAY/), ['NoticeWindow.kt'], 'only NoticeWindow.kt adds a window');
+  assert.deepEqual(only(/TYPE_APPLICATION_OVERLAY|TYPE_SYSTEM_[A-Z_]+|TYPE_TOAST|SYSTEM_ALERT_WINDOW|canDrawOverlays|POST_NOTIFICATIONS/), []);
+  assert.deepEqual(only(/\bToast\b/), ['MainActivity.kt'], 'Toasts only from the app screen in front, never from the service');
 });
 
 test('the Accessibility cache is kept off, so other apps\' events never reach the process', () => {
@@ -116,16 +137,16 @@ test('the manifest asks for nothing; expected-permissions.txt holds the package 
   assert.doesNotMatch(m, /<permission\b(?![^>]*tools:node="remove")/);
 });
 
-test('the service configuration: YouTube only, notificationTimeout 0, window content, not a tool', () => {
+test('the service configuration: YouTube and Instagram only, notificationTimeout 0, window content, not a tool', () => {
   const x = read('android/app/src/main/res/xml/accessibility_service_config.xml').replace(/<!--[\s\S]*?-->/g, '');
-  assert.match(x, /android:packageNames="com\.google\.android\.youtube"/);
+  assert.match(x, /android:packageNames="com\.google\.android\.youtube,com\.instagram\.android"/);
   assert.match(x, /android:notificationTimeout="0"/);
   assert.match(x, /android:canRetrieveWindowContent="true"/);
   assert.match(x, /android:isAccessibilityTool="false"/);
   assert.match(x, /android:accessibilityFlags="flagReportViewIds"/);
   assert.doesNotMatch(x, /canPerformGestures|canTakeScreenshot|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews|flagRequestFilterKeyEvents/);
   const rules = JSON.parse(read('rules/screen-rules.json')) as { apps: { package: string }[] };
-  assert.deepEqual(rules.apps.map((a) => a.package), ['com.google.android.youtube'], 'the rules and the service list agree');
+  assert.deepEqual(rules.apps.map((a) => a.package), ['com.google.android.youtube', 'com.instagram.android'], 'the rules and the service list agree');
 });
 
 test('the disclosure version is the same on both sides', () => {
@@ -148,7 +169,7 @@ test('the report email reads the package name at run time and carries no screen 
   assert.doesNotMatch(email, /no\.stormberry/, 'LinkList.email never names a package: the caller passes Context.packageName');
   assert.doesNotMatch(email, /Node|getText|contentDescription|rootInActiveWindow/);
   const main = stripComments(read('android/app/src/main/kotlin/no/stormberry/stopscroll/MainActivity.kt'));
-  assert.match(main, /LinkList\.email\(appVersion\(\), appVersionCode\(\), packageName, Build\.VERSION\.RELEASE, installedVersion\(rules\.packages\.first\(\)\)\)/);
+  assert.match(main, /LinkList\.email\(appVersion\(\), appVersionCode\(\), packageName, Build\.VERSION\.RELEASE, rules\.apps\.map \{ it\.name to installedVersion\(it\.packageName\) \}\)/);
 });
 
 test('the name is never shortened to SS (spec 1)', () => {

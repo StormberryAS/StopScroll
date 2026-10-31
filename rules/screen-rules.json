@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "rulesVersion": "2026-10-29.1",
-  "date": "2026-10-29",
+  "rulesVersion": "2026-10-30.1",
+  "date": "2026-10-30",
   "apps": [
     {
       "id": "youtube",
@@ -29,6 +29,46 @@
           "appVersionCode": 0,
           "date": "2026-10-29",
           "how": "uiautomator dumps, sanitised into tests/fixtures/youtube/"
+        }
+      ]
+    },
+    {
+      "id": "instagram",
+      "package": "com.instagram.android",
+      "name": "Instagram",
+      "feedName": "Instagram Reels",
+      "surfaces": [
+        {
+          "id": "reels",
+          "match": {
+            "all": [
+              { "node": { "id": "clips_viewer_view_pager", "minHeight": 0.6 } },
+              {
+                "any": [
+                  { "node": { "id": "clips_single_media_component", "minHeight": 0.6 } },
+                  { "node": { "id": "clips_tab", "selected": true } }
+                ]
+              }
+            ]
+          },
+          "exclude": [
+            { "node": { "id": "reel_viewer_root" } },
+            { "node": { "id": "direct_inbox_action_bar" } },
+            { "node": { "id": "inbox_refreshable_thread_list_recyclerview" } },
+            { "node": { "id": "message_thread_container" } },
+            { "node": { "id": "row_thread_composer_container" } }
+          ],
+          "otherTab": { "parentId": "tab_bar", "child": "firstClickable" }
+        }
+      ],
+      "verifiedOn": [
+        {
+          "device": "Pixel, Android 17",
+          "android": "17",
+          "appVersionName": "453.0.0.57.79",
+          "appVersionCode": 385914557,
+          "date": "2026-10-30",
+          "how": "uiautomator dumps, sanitised into tests/fixtures/instagram/"
         }
       ]
     }

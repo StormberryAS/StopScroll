@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- StopScroll test fixture. SANITISED by tools/scrub-fixture.ts: every text, content-desc and hint
+     was removed, with every attribute except class, resource-id, bounds and selected. The tree
+     structure is kept as captured. The raw capture holds personal on-screen text and never enters
+     this repository. -->
+<fixture app="com.instagram.android" label="instagram-reels-tab-2" expect="block" captured="2026-10-30" device="Pixel, Android 17" android="17" source="uiautomator">
+  <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+    <node class="androidx.viewpager.widget.ViewPager" resource-id="com.instagram.android:id/swipeable_tab_view_pager" bounds="[0,172][1080,2221]" selected="false">
+      <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/gesture_manager" bounds="[0,172][1080,2221]" selected="false">
+        <node class="androidx.viewpager.widget.ViewPager" resource-id="com.instagram.android:id/clips_viewer_view_pager" bounds="[0,172][1080,2221]" selected="false">
+          <node class="android.view.ViewGroup" resource-id="" bounds="[0,172][1080,2221]" selected="false">
+            <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_media_component" bounds="[0,172][1080,2221]" selected="false">
+              <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_single_media_component" bounds="[0,172][1080,2221]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="" bounds="[0,172][1080,2221]" selected="false">
+                  <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/clips_video_container" bounds="[0,172][1080,2221]" selected="false" />
+                </node>
+              </node>
+            </node>
+            <node class="android.view.ViewGroup" resource-id="" bounds="[0,172][1080,2221]" selected="false">
+              <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_item_overlay_component" bounds="[0,172][1080,2221]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="" bounds="[540,1197][540,1197]" selected="false" />
+              </node>
+              <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_pause_and_mute_component" bounds="[0,172][1080,2221]" selected="false">
+                <node class="android.widget.Button" resource-id="com.instagram.android:id/clips_mute_button" bounds="[492,1048][588,1144]" selected="false" />
+                <node class="android.widget.Button" resource-id="com.instagram.android:id/clips_pause_button" bounds="[456,1176][625,1345]" selected="false" />
+              </node>
+              <node class="android.view.ViewGroup" resource-id="" bounds="[0,172][1080,2221]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_media_info_component" bounds="[0,1945][943,2195]" selected="false">
+                  <node class="android.view.ViewGroup" resource-id="" bounds="[0,1945][943,2158]" selected="false">
+                    <node class="android.view.ViewGroup" resource-id="" bounds="[0,1945][943,2158]" selected="false">
+                      <node class="android.view.ViewGroup" resource-id="" bounds="[42,1945][943,2158]" selected="false">
+                        <node class="android.view.ViewGroup" resource-id="" bounds="[42,1945][943,2084]" selected="false">
+                          <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_author_info_component" bounds="[42,1945][526,2084]" selected="false">
+                            <node class="android.widget.Button" resource-id="com.instagram.android:id/clips_author_profile_pic" bounds="[42,1980][137,2075]" selected="false" />
+                            <node class="android.view.ViewGroup" resource-id="" bounds="[137,1984][388,2032]" selected="false">
+                              <node class="android.widget.Button" resource-id="com.instagram.android:id/clips_author_username" bounds="[137,1984][388,2032]" selected="false" />
+                            </node>
+                            <node class="android.view.ViewGroup" resource-id="" bounds="[190,2033][463,2071]" selected="false" />
+                          </node>
+                          <node class="android.view.ViewGroup" resource-id="" bounds="[526,1971][756,2084]" selected="false">
+                            <node class="android.widget.TextView" resource-id="com.instagram.android:id/inline_follow_button" bounds="[542,1992][719,2068]" selected="false" />
+                          </node>
+                        </node>
+                        <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_caption_component" bounds="[42,2084][943,2158]" selected="false">
+                          <node class="android.widget.ScrollView" resource-id="" bounds="[42,2084][943,2158]" selected="false">
+                            <node class="android.view.ViewGroup" resource-id="" bounds="[42,2095][943,2158]" selected="false">
+                              <node class="android.view.ViewGroup" resource-id="" bounds="[42,2095][943,2158]" selected="false" />
+                            </node>
+                          </node>
+                        </node>
+                      </node>
+                    </node>
+                  </node>
+                </node>
+                <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_ufi_component" bounds="[943,1047][1080,2195]" selected="false">
+                  <node class="android.view.ViewGroup" resource-id="" bounds="[943,1047][1059,2153]" selected="false">
+                    <node class="android.view.ViewGroup" resource-id="" bounds="[943,1047][1059,2153]" selected="false">
+                      <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/like_button" bounds="[943,1047][1059,1163]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/like_count" bounds="[943,1163][1059,1225]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/comment_button" bounds="[943,1225][1059,1341]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/comment_count" bounds="[943,1341][1059,1403]" selected="false" />
+                      <node class="android.widget.Button" resource-id="" bounds="[943,1403][1059,1519]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/repost_count" bounds="[943,1519][1059,1581]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/direct_share_button" bounds="[943,1581][1059,1697]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/ufi_text_component" bounds="[943,1697][1059,1759]" selected="false" />
+                      <node class="android.widget.ImageView" resource-id="com.instagram.android:id/save_button" bounds="[943,1759][1059,1875]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/save_count" bounds="[943,1875][1059,1937]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/clips_ufi_more_button_component" bounds="[943,1937][1059,2053]" selected="false" />
+                      <node class="android.view.ViewGroup" resource-id="" bounds="[962,2074][1041,2153]" selected="false">
+                        <node class="android.widget.Button" resource-id="com.instagram.android:id/media_album_art_button" bounds="[962,2074][1041,2153]" selected="false" />
+                      </node>
+                    </node>
+                  </node>
+                </node>
+                <node class="android.view.ViewGroup" resource-id="" bounds="[0,2195][1080,2221]" selected="false" />
+              </node>
+              <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/clips_bottom_legibility_gradient_component" bounds="[0,1771][1080,2221]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="" bounds="[0,1771][1080,2221]" selected="false" />
+              </node>
+              <node class="android.view.ViewGroup" resource-id="" bounds="[0,2011][1080,2221]" selected="false">
+                <node class="android.widget.SeekBar" resource-id="com.instagram.android:id/scrubber" bounds="[0,2195][1080,2221]" selected="false" />
+              </node>
+            </node>
+          </node>
+        </node>
+        <node class="android.widget.ImageView" resource-id="" bounds="[0,183][125,308]" selected="false" />
+        <node class="android.widget.TextView" resource-id="com.instagram.android:id/clips_viewer_action_bar_title" bounds="[423,206][657,284]" selected="false" />
+        <node class="android.widget.Button" resource-id="" bounds="[934,183][1059,308]" selected="false" />
+      </node>
+    </node>
+    <node class="android.view.View" resource-id="com.instagram.android:id/clips_expanded_touch_view" bounds="[0,2143][1080,2247]" selected="false" />
+    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/feed_tab" bounds="[0,2221][216,2347]" selected="false" />
+    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/clips_tab" bounds="[216,2221][432,2347]" selected="true" />
+    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/direct_tab" bounds="[432,2221][648,2347]" selected="false" />
+    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/search_tab" bounds="[648,2221][864,2347]" selected="false" />
+    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/profile_tab" bounds="[864,2221][1080,2347]" selected="false" />
+  </node>
+</fixture>

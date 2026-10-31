@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- StopScroll test fixture. SANITISED by tools/scrub-fixture.ts: every text, content-desc and hint
+     was removed, with every attribute except class, resource-id, bounds and selected. The tree
+     structure is kept as captured. The raw capture holds personal on-screen text and never enters
+     this repository. -->
+<fixture app="com.instagram.android" label="instagram-chat-1" expect="allow" captured="2026-10-30" device="Pixel, Android 17" android="17" source="uiautomator">
+  <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+    <node class="android.widget.LinearLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+      <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+        <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/action_bar_root" bounds="[0,0][1080,2410]" selected="false">
+          <node class="android.widget.FrameLayout" resource-id="android:id/content" bounds="[0,0][1080,2410]" selected="false">
+            <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/layout_container_parent" bounds="[0,0][1080,2410]" selected="false">
+              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/layout_container_main" bounds="[0,172][1080,2347]" selected="false">
+                <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/thread_fragment_container" bounds="[0,172][1080,2347]" selected="false">
+                  <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/thread_background_view_container" bounds="[0,172][1080,2347]" selected="false">
+                    <node class="android.widget.ImageView" resource-id="com.instagram.android:id/thread_background_view" bounds="[0,172][1080,2175]" selected="false" />
+                  </node>
+                  <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/message_actions_fragment" bounds="[0,172][1080,2347]" selected="false" />
+                  <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/direct_thread_header" bounds="[0,172][1080,319]" selected="false">
+                    <node class="android.widget.ImageView" resource-id="com.instagram.android:id/header_left_button" bounds="[0,172][147,319]" selected="false" />
+                    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/header_avatar" bounds="[178,198][273,293]" selected="false">
+                      <node class="android.widget.ImageView" resource-id="com.instagram.android:id/header_avatar" bounds="[188,208][262,282]" selected="false" />
+                    </node>
+                    <node class="android.widget.Button" resource-id="com.instagram.android:id/header_title_subtitle_container" bounds="[304,200][650,290]" selected="false">
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/header_title" bounds="[304,200][650,248]" selected="false" />
+                      <node class="android.widget.Button" resource-id="com.instagram.android:id/header_subtitle" bounds="[304,248][650,290]" selected="false" />
+                    </node>
+                    <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/header_right_buttons" bounds="[681,172][1059,319]" selected="false">
+                      <node class="android.widget.ImageView" resource-id="" bounds="[681,172][807,319]" selected="false" />
+                      <node class="android.widget.ImageView" resource-id="" bounds="[807,172][933,319]" selected="false" />
+                      <node class="android.widget.ImageView" resource-id="" bounds="[933,172][1059,319]" selected="false" />
+                    </node>
+                  </node>
+                  <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/direct_thread_content_below_action_bar" bounds="[0,319][1080,2347]" selected="false">
+                    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/thread_toggle_child_fragment_container" bounds="[0,319][1080,2347]" selected="false">
+                      <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/thread_view_root" bounds="[0,319][1080,2347]" selected="false">
+                        <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/message_thread_container" bounds="[0,319][1080,2347]" selected="false">
+                          <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/message_list_refresh_container" bounds="[0,319][1080,2261]" selected="false">
+                            <node class="androidx.recyclerview.widget.RecyclerView" resource-id="com.instagram.android:id/message_list" bounds="[0,319][1080,2261]" selected="false">
+                              <node class="com.facebook.compose.view.MetaComposeView" resource-id="" bounds="[0,319][1080,975]" selected="false">
+                                <node class="android.view.View" resource-id="" bounds="[0,138][1080,975]" selected="false">
+                                  <node class="android.view.View" resource-id="" bounds="[393,191][687,485]" selected="false">
+                                    <node class="android.view.View" resource-id="" bounds="[393,191][687,485]" selected="false" />
+                                  </node>
+                                  <node class="android.widget.TextView" resource-id="" bounds="[247,517][834,573]" selected="false" />
+                                  <node class="android.widget.TextView" resource-id="" bounds="[408,584][672,634]" selected="false" />
+                                  <node class="android.widget.TextView" resource-id="" bounds="[333,645][748,695]" selected="false" />
+                                  <node class="android.widget.TextView" resource-id="" bounds="[199,706][881,756]" selected="false" />
+                                  <node class="android.widget.TextView" resource-id="" bounds="[116,767][964,817]" selected="false" />
+                                  <node class="android.view.View" resource-id="" bounds="[396,828][685,954]" selected="false">
+                                    <node class="android.widget.TextView" resource-id="" bounds="[438,869][643,913]" selected="false" />
+                                    <node class="android.widget.Button" resource-id="" bounds="[396,849][685,933]" selected="false" />
+                                  </node>
+                                </node>
+                              </node>
+                              <node class="android.widget.TextView" resource-id="" bounds="[0,1039][1080,1122]" selected="false" />
+                              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/message_content" bounds="[0,1154][1080,2059]" selected="false">
+                                <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_content_horizontal_linear_layout" bounds="[0,1154][1059,2059]" selected="false">
+                                  <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_content_vertical_linear_layout" bounds="[0,1154][1059,2059]" selected="false">
+                                    <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_placeholder_container" bounds="[0,1154][698,2007]" selected="false">
+                                      <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_content_horizontal_placeholder_container" bounds="[0,1154][698,1956]" selected="false">
+                                        <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_content_shortcut_buttons_container" bounds="[614,1513][698,1597]" selected="false">
+                                          <node class="android.widget.LinearLayout" resource-id="" bounds="[614,1513][698,1597]" selected="false">
+                                            <node class="android.widget.ImageView" resource-id="com.instagram.android:id/forwarding_shortcut_button" bounds="[614,1513][698,1597]" selected="false" />
+                                          </node>
+                                        </node>
+                                        <node class="android.widget.ImageView" resource-id="com.instagram.android:id/sender_avatar" bounds="[47,1882][121,1956]" selected="false" />
+                                        <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/message_content_portrait_xma_container" bounds="[147,1154][593,1956]" selected="false">
+                                          <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/reel_share_item_view" bounds="[147,1154][593,1956]" selected="false">
+                                            <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/media_constraint_layout" bounds="[147,1154][593,1956]" selected="false">
+                                              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/image" bounds="[147,1154][593,1956]" selected="false">
+                                                <node class="android.widget.ImageView" resource-id="" bounds="[147,1154][593,1956]" selected="false" />
+                                                <node class="android.view.View" resource-id="com.instagram.android:id/legibility_gradient_header" bounds="[147,1154][593,1322]" selected="false" />
+                                                <node class="android.view.View" resource-id="com.instagram.android:id/direct_reel_share_legibility_gradient_footer" bounds="[147,1882][593,1956]" selected="false" />
+                                              </node>
+                                              <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/profile_attribution_container" bounds="[179,1186][561,1249]" selected="false">
+                                                <node class="android.widget.ImageView" resource-id="com.instagram.android:id/profile_attribution_picture" bounds="[179,1186][242,1249]" selected="false" />
+                                                <node class="android.widget.LinearLayout" resource-id="" bounds="[263,1195][561,1239]" selected="false">
+                                                  <node class="android.widget.TextView" resource-id="com.instagram.android:id/title_text" bounds="[263,1195][561,1239]" selected="false" />
+                                                </node>
+                                              </node>
+                                              <node class="android.widget.ImageView" resource-id="com.instagram.android:id/center_icon" bounds="[328,1513][412,1597]" selected="false" />
+                                              <node class="android.widget.ImageView" resource-id="com.instagram.android:id/bottom_icon" bounds="[179,1861][242,1924]" selected="false" />
+                                            </node>
+                                          </node>
+                                        </node>
+                                      </node>
+                                      <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_pills_container" bounds="[147,1956][243,2007]" selected="false">
+                                        <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_reactions_pill_container" bounds="[169,1956][243,2007]" selected="false">
+                                          <node class="android.widget.Button" resource-id="com.instagram.android:id/reaction_add" bounds="[185,1956][227,1997]" selected="false">
+                                            <node class="android.widget.ImageView" resource-id="com.instagram.android:id/reaction_add_icon" bounds="[190,1960][222,1992]" selected="false" />
+                                          </node>
+                                        </node>
+                                      </node>
+                                    </node>
+                                    <node class="android.widget.TextView" resource-id="com.instagram.android:id/message_footer_label" bounds="[147,2007][608,2059]" selected="false" />
+                                  </node>
+                                </node>
+                              </node>
+                              <node class="android.widget.TextView" resource-id="" bounds="[21,2091][1059,2174]" selected="false" />
+                            </node>
+                          </node>
+                          <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/meta_ai_voice_container" bounds="[0,319][1080,2190]" selected="false" />
+                        </node>
+                      </node>
+                    </node>
+                    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/direct_command_picker_container" bounds="[0,319][1080,2174]" selected="false" />
+                    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/message_composer_bar" bounds="[0,2174][1080,2347]" selected="false">
+                      <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/message_composer_reply_bar_container" bounds="[0,2174][1080,2347]" selected="false">
+                        <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/row_thread_composer_container" bounds="[0,2174][1080,2347]" selected="false">
+                          <node class="android.widget.ImageView" resource-id="com.instagram.android:id/blurred_text_area_background" bounds="[21,2195][1059,2326]" selected="false" />
+                          <node class="android.widget.LinearLayout" resource-id="" bounds="[21,2195][1059,2326]" selected="false">
+                            <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/row_thread_composer_textarea_container" bounds="[21,2195][1059,2326]" selected="false">
+                              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/row_thread_composer_shortcut_viewgroup" bounds="[37,2210][137,2310]" selected="false">
+                                <node class="android.widget.ImageView" resource-id="com.instagram.android:id/row_thread_composer_button_camera" bounds="[37,2210][137,2310]" selected="false" />
+                              </node>
+                              <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/composer_content_container" bounds="[158,2195][621,2326]" selected="false">
+                                <node class="android.widget.EditText" resource-id="com.instagram.android:id/row_thread_composer_edittext" bounds="[158,2195][621,2326]" selected="false" />
+                              </node>
+                              <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/row_thread_composer_buttons_container" bounds="[621,2195][1041,2310]" selected="false">
+                                <node class="android.widget.ImageView" resource-id="com.instagram.android:id/row_thread_composer_voice" bounds="[621,2231][726,2294]" selected="false" />
+                                <node class="android.widget.ImageView" resource-id="com.instagram.android:id/row_thread_composer_button_gallery" bounds="[726,2231][831,2294]" selected="false" />
+                                <node class="android.widget.ImageView" resource-id="com.instagram.android:id/row_thread_composer_button_sticker" bounds="[831,2231][936,2294]" selected="false" />
+                                <node class="android.widget.ImageView" resource-id="com.instagram.android:id/row_thread_composer_button_overflow" bounds="[936,2231][1041,2294]" selected="false" />
+                              </node>
+                            </node>
+                          </node>
+                        </node>
+                      </node>
+                    </node>
+                  </node>
+                </node>
+              </node>
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</fixture>

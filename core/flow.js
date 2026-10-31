@@ -63,7 +63,6 @@ export function showAdvancedProtection(state) {
     return state.sdk >= 37 && !state.serviceRunning;
 }
 export const COMING_SOON = [
-    { key: 'instagram', name: 'Instagram' },
     { key: 'facebook', name: 'Facebook' },
     { key: 'snapchat', name: 'Snapchat' },
     { key: 'linkedin', name: 'LinkedIn' },

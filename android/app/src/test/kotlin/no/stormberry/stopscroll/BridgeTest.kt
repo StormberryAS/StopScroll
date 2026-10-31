@@ -41,20 +41,20 @@ class BridgeTest {
 
     /** The report email (Marcos, 2026-10-29): exactly these lines, versions and the package name only. */
     @Test fun theReportEmailIsExactlyTheApprovedOne() {
-        val mail = LinkList.email("0.0.1", 1001, "no.stormberry.stopscroll.play", "17", "21.42.36")
+        val mail = LinkList.email("0.0.2", 1002, "no.stormberry.stopscroll.play", "17", listOf("YouTube" to "21.42.36", "Instagram" to "453.0.0.57.79"))
         val (to, query) = mail.removePrefix("mailto:").split("?", limit = 2)
         assertEquals("info@stormberry.as", to)
         val params = query.split("&").associate { val (k, v) = it.split("=", limit = 2); k to java.net.URLDecoder.decode(v, "UTF-8") }
         assertEquals(setOf("subject", "body"), params.keys)
-        assertEquals("StopScroll 0.0.1: missed a feed or blocked a normal video", params["subject"])
+        assertEquals("StopScroll 0.0.2: missed a feed or blocked a normal video", params["subject"])
         assertEquals(
-            "Which app:\nWhat happened:\n\nStopScroll 0.0.1 (1001)\nno.stormberry.stopscroll.play\nAndroid 17\nYouTube 21.42.36",
+            "Which app:\nWhat happened:\n\nStopScroll 0.0.2 (1002)\nno.stormberry.stopscroll.play\nAndroid 17\nYouTube 21.42.36\nInstagram 453.0.0.57.79",
             params["body"],
         )
         // Spaces are %20, never "+", so every mail app shows them as spaces.
         assertEquals(false, mail.contains("+"))
-        val none = LinkList.email("0.0.1", 1, "no.stormberry.stopscroll", "16", null)
-        assertEquals(true, java.net.URLDecoder.decode(none, "UTF-8").endsWith("\nno.stormberry.stopscroll\nAndroid 16\nYouTube not installed"))
+        val none = LinkList.email("0.0.2", 2, "no.stormberry.stopscroll", "16", listOf("YouTube" to null, "Instagram" to null))
+        assertEquals(true, java.net.URLDecoder.decode(none, "UTF-8").endsWith("\nno.stormberry.stopscroll\nAndroid 16\nYouTube not installed\nInstagram not installed"))
     }
 
     @Test fun navigationLetsOnlyTheAppsOwnPagesAndTheFixedLinksThrough() {

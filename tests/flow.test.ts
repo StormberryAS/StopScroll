@@ -11,9 +11,13 @@ const youtube = {
   id: 'youtube', package: 'com.google.android.youtube', name: 'YouTube', feedName: 'YouTube Shorts', mode: 'always',
   installed: true, versionName: '21.42.36', closed: 0, loopPauses: 0, lastClosed: null,
 };
+const instagram = {
+  id: 'instagram', package: 'com.instagram.android', name: 'Instagram', feedName: 'Instagram Reels', mode: 'always',
+  installed: true, versionName: '453.0.0.57.79', closed: 0, loopPauses: 0, lastClosed: null,
+};
 const base = {
   consentGiven: false, consentDate: null, serviceEnabled: false, serviceRunning: false, sdk: 36, installedFromFile: false,
-  returnedFromSettings: false, appVersion: '0.0.1', rulesVersion: '2026-10-29.1', disclosureVersion: DISCLOSURE_VERSION, apps: [youtube],
+  returnedFromSettings: false, appVersion: '0.0.2', rulesVersion: '2026-10-30.1', disclosureVersion: DISCLOSURE_VERSION, apps: [youtube, instagram],
 };
 const state = (over: Record<string, unknown> = {}): State => {
   const s = parseState({ ...base, ...over });
@@ -54,29 +58,34 @@ test('the Advanced Protection line shows on Android 17 and later while the servi
   assert.equal(showAdvancedProtection(state({ sdk: 37, serviceRunning: true })), false);
 });
 
-test('the app list: YouTube selectable; Instagram, Facebook, Snapchat, LinkedIn and X coming soon, not selectable', () => {
+test('the app list: YouTube and Instagram selectable; Facebook, Snapchat, LinkedIn and X coming soon, not selectable', () => {
   const rows = appRows(state());
   assert.deepEqual(rows.map((r) => r.name), ['YouTube', 'Instagram', 'Facebook', 'Snapchat', 'LinkedIn', 'X']);
-  assert.ok(rows[0]?.app);
-  for (const r of rows.slice(1)) {
+  assert.equal(rows[0]?.app?.package, 'com.google.android.youtube');
+  assert.equal(rows[1]?.app?.package, 'com.instagram.android');
+  assert.equal(rows[1]?.app?.mode, 'always');
+  assert.equal(rows[1]?.note, 'Instagram 453.0.0.57.79 is installed.');
+  for (const r of rows.slice(2)) {
     assert.equal(r.app, null, `${r.name} is not selectable`);
     assert.equal(r.note, 'Coming soon');
   }
-  assert.deepEqual(COMING_SOON.map((c) => c.key), ['instagram', 'facebook', 'snapchat', 'linkedin', 'x']);
-  assert.match(appRows(state({ apps: [{ ...youtube, installed: false, versionName: null }] }))[0]?.note ?? '', /not installed/);
-  // An app the rules cover is never listed twice: once a release watches Instagram, its row is real.
-  const ig = { ...youtube, id: 'instagram', package: 'com.instagram.android', name: 'Instagram', feedName: 'Instagram Reels' };
-  const both = appRows(state({ apps: [youtube, ig] }));
-  assert.equal(both.filter((r) => r.key === 'instagram').length, 1);
-  assert.ok(both.find((r) => r.key === 'instagram')?.app);
+  assert.deepEqual(COMING_SOON.map((c) => c.key), ['facebook', 'snapchat', 'linkedin', 'x']);
+  assert.match(appRows(state({ apps: [youtube, { ...instagram, installed: false, versionName: null }] }))[1]?.note ?? '', /^Instagram is not installed/);
+  // An app the rules cover is never listed twice, and is never a coming-soon row.
+  assert.equal(rows.filter((r) => r.key === 'instagram').length, 1);
+  assert.ok(!COMING_SOON.some((c) => c.key === 'instagram'));
+  // Off for one app leaves the other on: the status line says on.
+  assert.equal(statusLine(state({ consentGiven: true, serviceEnabled: true, apps: [{ ...youtube, mode: 'off' }, instagram] })), 'StopScroll is on.');
 });
 
 test('the disclosure names exactly the apps this build watches, and no Facebook sentence', () => {
   const d = disclosure(state());
   const all = d.paragraphs.map((p) => `${p.lead ?? ''} ${p.body}`).join(' ');
   assert.equal(d.title, 'StopScroll needs Accessibility access');
-  assert.match(all, /Only while you are in the YouTube app\./);
-  assert.doesNotMatch(all, /Instagram|Facebook/);
+  assert.match(all, /Only while you are in the YouTube or Instagram app\./);
+  assert.match(all, /whether a Shorts or Reels player is open/);
+  assert.doesNotMatch(all, /Facebook|Snapchat|LinkedIn/);
+  assert.equal(DISCLOSURE_VERSION, 2, '0.0.2 changed the disclosure, so a 0.0.1 consent no longer counts');
   assert.deepEqual(d.paragraphs.map((p) => p.lead), [null, 'What it looks at.', 'What it does.', 'What it keeps.', 'Other apps.', null]);
   assert.equal(appList(['YouTube', 'Instagram']), 'the YouTube or Instagram app');
   assert.equal(appList(['YouTube', 'Instagram', 'Facebook']), 'the YouTube, Instagram or Facebook app');
@@ -87,7 +96,7 @@ test('status line, dates and health line', () => {
   assert.equal(statusLine(state()), 'StopScroll is not on yet.');
   assert.match(statusLine(state({ consentGiven: true })), /Accessibility settings/);
   assert.equal(statusLine(state({ consentGiven: true, serviceEnabled: true })), 'StopScroll is on.');
-  assert.match(statusLine(state({ consentGiven: true, serviceEnabled: true, apps: [{ ...youtube, mode: 'off' }] })), /set to Off/);
+  assert.match(statusLine(state({ consentGiven: true, serviceEnabled: true, apps: [{ ...youtube, mode: 'off' }, { ...instagram, mode: 'off' }] })), /set to Off/);
   assert.equal(longDate('2026-10-29'), '29 October 2026');
   assert.equal(longDate('2026-13-01'), '2026-13-01');
   assert.equal(healthLine(state().apps[0]!), 'No feed closed yet.');

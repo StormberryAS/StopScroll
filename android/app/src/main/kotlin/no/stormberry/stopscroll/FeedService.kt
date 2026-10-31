@@ -6,12 +6,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
-import android.widget.Toast
 
 /*
  * The Accessibility Service (spec 6). It does four things and nothing else:
@@ -20,7 +20,9 @@ import android.widget.Toast
  *   - on a window or content change from a watched app, checks the screen through NodeFacts (the
  *     window check first, then only the IDs the rules name) and the rules (ScreenRules);
  *   - when the feed is open, runs the leave ladder (LeaveLadder): Back, Back, the tab or Home, Home;
- *   - shows a Toast saying why the screen changed, and counts what it did (Settings).
+ *   - shows a short on-screen message saying why the screen changed (Notice.kt, NoticeWindow: its own
+ *     Accessibility overlay window, because Android drops a Toast from an app without notifications,
+ *     decision D2), and counts what it did (Settings).
  * It never touches a node itself, never reads text and never logs. It never acts while the screen
  * is off or the lock screen shows. It keeps the Accessibility cache off (NodeFacts clears it after
  * every check; here at connect and whenever the plan is not active).
@@ -33,11 +35,13 @@ class FeedService : AccessibilityService() {
     private val throttle = CheckThrottle(SystemClock::uptimeMillis)
     private var pendingCheck: Runnable? = null
     private var pendingRecheck: Runnable? = null
+    private val notice = NoticeWindow(this, main)
     private val onSettings: () -> Unit = { applyPlan() }
     private val screenOff = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             cancelTimers()
             ladders.values.forEach { it.reset() }
+            notice.hide()
         }
     }
 
@@ -86,7 +90,14 @@ class FeedService : AccessibilityService() {
         main.postDelayed(r, delay)
     }
 
-    override fun onInterrupt() = Unit
+    /** Android asks the service to stop its feedback: the on-screen message goes too. */
+    override fun onInterrupt() = notice.hide()
+
+    /** Theme, font size or rotation changed: the message on screen is drawn again to match. */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        notice.redraw()
+    }
 
     private fun screenUsable(): Boolean {
         val power = getSystemService(PowerManager::class.java)
@@ -110,7 +121,6 @@ class FeedService : AccessibilityService() {
         when (step) {
             LadderStep.Nothing -> Unit
             is LadderStep.Press -> {
-                if (step.startsRun) toast(getString(R.string.toast_closed, app.feedName))
                 val pressed = when (step.action) {
                     LeaveAction.BACK -> performGlobalAction(GLOBAL_ACTION_BACK)
                     LeaveAction.HOME -> performGlobalAction(GLOBAL_ACTION_HOME)
@@ -126,11 +136,10 @@ class FeedService : AccessibilityService() {
                 scheduleRecheck(app, ladder, step.recheckInMs)
             }
             LadderStep.Closed -> SettingsStore.update(this) { it.withClosed(app.packageName, Today.iso()) }
-            is LadderStep.Failed -> if (step.paused) {
-                SettingsStore.update(this) { it.withLoopPause(app.packageName) }
-                toast(getString(R.string.toast_paused, app.name))
-            }
+            is LadderStep.Failed -> if (step.paused) SettingsStore.update(this) { it.withLoopPause(app.packageName) }
         }
+        // After the press, so the message never delays Back: step 1 of a run, or the loop guard's pause.
+        Notices.forStep(app, step)?.let(notice::show)
     }
 
     private fun scheduleRecheck(app: AppRules, ladder: LeaveLadder, delayMs: Long) {
@@ -150,10 +159,6 @@ class FeedService : AccessibilityService() {
         }
         pendingRecheck = r
         main.postDelayed(r, delayMs)
-    }
-
-    private fun toast(text: String) {
-        Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
     }
 
     private fun cancelTimers() {
@@ -178,6 +183,7 @@ class FeedService : AccessibilityService() {
     }
 
     private fun stop() {
+        notice.hide()
         if (running !== this) return
         running = null
         cancelTimers()

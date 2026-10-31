@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- StopScroll test fixture. SANITISED by tools/scrub-fixture.ts: every text, content-desc and hint
+     was removed, with every attribute except class, resource-id, bounds and selected. The tree
+     structure is kept as captured. The raw capture holds personal on-screen text and never enters
+     this repository. -->
+<fixture app="com.instagram.android" label="instagram-stories-1" expect="allow" captured="2026-10-30" device="Pixel, Android 17" android="17" source="uiautomator">
+  <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+    <node class="android.widget.LinearLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+      <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+        <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/action_bar_root" bounds="[0,0][1080,2410]" selected="false">
+          <node class="android.widget.FrameLayout" resource-id="android:id/content" bounds="[0,0][1080,2410]" selected="false">
+            <node class="android.widget.FrameLayout" resource-id="" bounds="[0,0][1080,2410]" selected="false">
+              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/swipe_navigation_container" bounds="[0,0][1080,2410]" selected="false">
+                <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/layout_container_center_right_coordinator_layout" bounds="[0,0][1080,2347]" selected="false">
+                  <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/layout_container_right" bounds="[0,172][1080,2347]" selected="false" />
+                  <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/activity_and_camera_shared_views_main_container" bounds="[0,172][1080,2347]" selected="false" />
+                  <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/layout_container_main_panel" bounds="[0,172][1080,2347]" selected="false">
+                    <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/layout_container_main_wrapper" bounds="[0,172][1080,2347]" selected="false">
+                      <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/layout_container_main" bounds="[0,172][1080,2347]" selected="false" />
+                      <node class="androidx.viewpager.widget.ViewPager" resource-id="com.instagram.android:id/swipeable_tab_view_pager" bounds="[0,172][1080,2347]" selected="false">
+                        <node class="androidx.recyclerview.widget.RecyclerView" resource-id="com.instagram.android:id/swipeable_nav_view_pager_inner_recycler_view" bounds="[0,172][1080,2347]" selected="false">
+                          <node class="android.widget.FrameLayout" resource-id="" bounds="[0,172][1080,2347]" selected="false">
+                            <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/layout_container_swipeable" bounds="[0,172][1080,2347]" selected="false">
+                              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_viewer_root" bounds="[0,172][1080,2347]" selected="false">
+                                <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/view_pager" bounds="[0,172][1080,2347]" selected="false">
+                                  <node class="android.widget.Button" resource-id="" bounds="[0,172][1080,2347]" selected="false">
+                                    <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/reel_viewer_content_layout" bounds="[0,172][1080,2347]" selected="false">
+                                      <node class="android.view.View" resource-id="" bounds="[0,172][1080,215]" selected="false" />
+                                      <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_view_group" bounds="[0,215][1080,2347]" selected="false">
+                                        <node class="android.view.ViewGroup" resource-id="com.instagram.android:id/reel_item_toolbar_container" bounds="[0,215][1080,2304]" selected="false">
+                                          <node class="android.view.ViewGroup" resource-id="" bounds="[0,2104][1080,2136]" selected="false">
+                                            <node class="android.widget.LinearLayout" resource-id="" bounds="[0,2104][1080,2136]" selected="false" />
+                                          </node>
+                                          <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/reel_item_toolbar_footer_container" bounds="[0,2136][1080,2304]" selected="false">
+                                            <node class="android.widget.FrameLayout" resource-id="" bounds="[0,2136][1080,2304]" selected="false" />
+                                          </node>
+                                        </node>
+                                        <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_viewer_media_layout" bounds="[0,215][1080,2135]" selected="false">
+                                          <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_sticker_overlay_container" bounds="[0,215][1080,2135]" selected="false">
+                                            <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_sticker_accessibility_container" bounds="[0,215][1080,2135]" selected="false" />
+                                          </node>
+                                          <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_viewer_media_container" bounds="[0,215][1080,2135]" selected="false">
+                                            <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/reel_viewer_image_view" bounds="[0,215][1080,2135]" selected="false">
+                                              <node class="android.widget.ImageView" resource-id="" bounds="[0,215][1080,2135]" selected="false" />
+                                            </node>
+                                          </node>
+                                          <node class="android.widget.LinearLayout" resource-id="com.instagram.android:id/reel_viewer_header_container" bounds="[0,215][1080,404]" selected="false" />
+                                        </node>
+                                      </node>
+                                    </node>
+                                  </node>
+                                </node>
+                              </node>
+                            </node>
+                          </node>
+                        </node>
+                      </node>
+                    </node>
+                  </node>
+                </node>
+                <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/bottom_sheet_camera_container" bounds="[0,172][1080,2347]" selected="false" />
+              </node>
+              <node class="android.widget.FrameLayout" resource-id="com.instagram.android:id/overlay_layout_container" bounds="[0,0][1080,2347]" selected="false" />
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </node>
+</fixture>

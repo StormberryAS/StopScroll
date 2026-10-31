@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  StopScroll's Accessibility Service, stage 1 part one (spec 6.1, with the 2026-10-29 build scope:
-  YouTube only; Instagram waits for its captures, Facebook for stage 2).
+  StopScroll's Accessibility Service, stage 1 (spec 6.1): YouTube since 0.0.1, Instagram since 0.0.2
+  (captured 2026-10-30); Facebook waits for stage 2.
 
   packageNames: ONLY the apps this build watches, and never empty: an empty list means every app.
     When no app is on or consent is missing, FeedService keeps this list and sets the event types
     to 0 instead (ServiceConfig.kt, review B1).
   notificationTimeout 0: a value above 0 only delays every event (AOSP notifyAccessibilityEvent);
     FeedService throttles content changes itself.
-  canRetrieveWindowContent and flagReportViewIds: Shorts opens inside YouTube's main activity, so
-    only the view IDs tell it apart.
+  canRetrieveWindowContent and flagReportViewIds: Shorts opens inside YouTube's main activity and
+    Reels inside Instagram's (MainTabActivity, also for Stories and Explore), so only the view IDs
+    tell them apart.
   isAccessibilityTool false, always: StopScroll is not an accessibility tool.
   Not requested: interactive windows, not-important views, gestures, screenshots, key events.
   tests/guards.test.ts pins every attribute here.
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
-    android:packageNames="com.google.android.youtube"
+    android:packageNames="com.google.android.youtube,com.instagram.android"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagReportViewIds"
     android:canRetrieveWindowContent="true"
